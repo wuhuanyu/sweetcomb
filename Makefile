@@ -175,7 +175,7 @@ _netopeer2:
 	&&wget https://github.com/CESNET/Netopeer2/archive/v0.7-r1.tar.gz\
 	&&tar xvf v0.7-r1.tar.gz\
 	&& echo "Netopeer2:keystored" \
-	&& cd Netopeer2-0.7-r1/keystored && mkdir -p build && cd build\
+	&& cd netopeer2-0.7-r1/keystored && mkdir -p build && cd build\
 	&&$(cmake) -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr ..\
 	&&make -j$(nproc) && make install && sudo ldconfig\
 	&& echo "Netopeer2:server" \
@@ -224,7 +224,7 @@ _ydk:
 _clean_dl:
 	@rm -rf $(BR)/downloads
 
-install-dep-extra: _clean_dl _libssh _libyang _libnetconf2 _sysrepo _netopeer2
+install-dep-extra: _clean_dl _libssh  _libnetconf2  _netopeer2
 	@cd ../ && rm -rf $(BR)/downloads
 
 install-vpp:
