@@ -312,6 +312,7 @@ static int ipv46_config_add_remove (const string &if_name, const string &addr,
         }
       else
         {
+          SRP_LOG_DBG_MSG("Deleting");
           /* Remove l3 thanks to its unique identifier */
           OM::remove (KEY (l3));
         }
@@ -398,16 +399,24 @@ static int ietf_interface_ipv46_address_change_cb (sr_session_ctx_t *session,
 
   foreach_change (session, iter, op, old_val, new_val)
   {
+    if(new_val){
+        SRP_LOG_DBG("new value is not null:%s",new_val->xpath);
+    }else{
+        SRP_LOG_DBG("old value is not null:%s",old_val->xpath);
+    }
 
     SRP_LOG_DBG ("A change detected in '%s', op=%d",
                  new_val ? new_val->xpath : old_val->xpath, op);
 
+    // Looks up the value of the key in a node specified by name.
     if_name = sr_xpath_key_value (new_val ? new_val->xpath : old_val->xpath,
                                   "interface", "name", &xpath_ctx);
     if (if_name.empty ())
       {
         rc = SR_ERR_OPERATION_FAILED;
         goto nothing_todo;
+      }else{
+          SRP_LOG_DBG("Starting to config:%s",if_name.c_str());
       }
     sr_xpath_recover (&xpath_ctx);
 
@@ -416,17 +425,20 @@ static int ietf_interface_ipv46_address_change_cb (sr_session_ctx_t *session,
         switch (op)
           {
           case SR_OP_CREATED:
+            SRP_LOG_DBG_MSG("operation is to create ip address");
             create = true;
             parse_interface_ipv46_address (new_val, new_addr, new_prefix);
             break;
           case SR_OP_MODIFIED:
             create = true;
             del = true;
+            SRP_LOG_DBG_MSG("operation is to modify ip address");
             parse_interface_ipv46_address (old_val, old_addr, old_prefix);
             parse_interface_ipv46_address (new_val, new_addr, new_prefix);
             break;
           case SR_OP_DELETED:
             del = true;
+            SRP_LOG_DBG_MSG("operation is to delete ip address");
             parse_interface_ipv46_address (old_val, old_addr, old_prefix);
             break;
           default:
@@ -439,15 +451,17 @@ static int ietf_interface_ipv46_address_change_cb (sr_session_ctx_t *session,
       }
     sr_free_val (old_val);
     sr_free_val (new_val);
-
+    
+    //if modify,delete and then create
     if (del && !old_addr.empty ())
-      {
+      { 
+          SRP_LOG_DBG_MSG("delete ip address");
         op_rc = ipv46_config_add_remove (if_name, old_addr, old_prefix,
                                          false /* del */);
       }
-
     if (create && !new_addr.empty ())
       {
+          SRP_LOG_DBG_MSG("add ip address");
         op_rc = ipv46_config_add_remove (if_name, new_addr, new_prefix,
                                          true /* add */);
       }
@@ -486,7 +500,8 @@ static int ietf_interface_state_cb (const char *xpath, sr_val_t **values,
   int rc = SR_ERR_OK;
 
   SRP_LOG_INF ("In %s", __FUNCTION__);
-
+  
+  //xpath must end with interface
   if (!sr_xpath_node_name_eq (xpath, "interface"))
     goto nothing_todo; // no interface field specified
 
@@ -585,6 +600,8 @@ static int interface_statistics_cb (const char *xpath, sr_val_t **values,
     {
       SRP_LOG_ERR_MSG ("XPATH interface name not found");
       return SR_ERR_INVAL_ARG;
+    }else{
+        SRP_LOG_DBG("trying to retrieve interface name %s from xpath",intf_name.c_str());
     }
   sr_xpath_recover (&state);
 
@@ -593,6 +610,8 @@ static int interface_statistics_cb (const char *xpath, sr_val_t **values,
     {
       SRP_LOG_WRN ("interface %s not found in VOM", intf_name.c_str ());
       goto nothing_todo;
+    }else{
+        SRP_LOG_DBG("found interface with name %s",intf_name.c_str());
     }
 
   /* allocate array of values to be returned */

@@ -242,8 +242,20 @@ endif
 install-test-extra: _clean_dl _libssh _test_python _ydk
 	@cd ../ && rm -rf $(BR)/downloads
 
-#Centos needs to build sysrepo plugin with same toolchain as libvom.so i.e.
-#devtoolset-7.
+build-plugins:
+ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
+	@mkdir -p $(BR)/build-plugins/; cd $(BR)/build-plugins/; \
+	$(cmake) -DCMAKE_BUILD_TYPE=Debug \
+	-DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/src/; \
+	make
+else ifeq ($(OS_ID),centos)
+	@mkdir -p $(BR)/build-plugins/; cd $(BR)/build-plugins/; \
+	$(cmake) -DCMAKE_BUILD_TYPE=Debug \
+	-DCMAKE_PROGRAM_PATH:PATH="/opt/rh/devtoolset-7/root/bin" \
+	-DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/src/; \
+	make
+endif
+
 install-plugins:
 ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
 	@mkdir -p $(BR)/build-plugins/; cd $(BR)/build-plugins/; \
