@@ -16,7 +16,7 @@
  */
 
 #include "sc_plugins.h"
-
+#include <unistd.h>
 #include <dirent.h>
 #include <string.h>
 #include <errno.h>
@@ -122,7 +122,10 @@ int sr_plugin_init_cb(sr_session_ctx_t *session, void **private_ctx)
     /* Connection to VAPI via VOM and VOM database */
     HW::init();
     OM::init();
-    while (HW::connect() != true);
+    while (HW::connect() != true){
+        //sleep for 200 milliseconds
+        usleep(200000);
+    }
     SRP_LOG_INF_MSG("Connection to VPP established");
 
     try {

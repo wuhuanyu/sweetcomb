@@ -165,7 +165,7 @@ _sysrepo:
 	&&wget https://github.com/sysrepo/sysrepo/archive/v0.7.7.tar.gz\
 	&&tar xvf v0.7.7.tar.gz && cd sysrepo-0.7.7 && mkdir -p build && cd build\
 	&&$(cmake) -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr \
-        -DGEN_LANGUAGE_BINDINGS=OFF -DGEN_CPP_BINDINGS=ON -DGEN_LUA_BINDINGS=OFF \
+        -DGEN_LANGUAGE_BINDINGS=ON -DGEN_CPP_BINDINGS=ON -DGEN_LUA_BINDINGS=OFF \
         -DGEN_PYTHON_BINDINGS=OFF -DGEN_JAVA_BINDINGS=OFF -DBUILD_EXAMPLES=OFF \
         -DENABLE_TESTS=OFF ..\
 	&&make -j$(nproc) &&make install&&cd ../../&& mv v0.7.7.tar.gz sysrepo-0.7.7.tar.gz
@@ -247,7 +247,7 @@ ifeq ($(filter ubuntu debian,$(OS_ID)),$(OS_ID))
 	@mkdir -p $(BR)/build-plugins/; cd $(BR)/build-plugins/; \
 	$(cmake) -DCMAKE_BUILD_TYPE=Debug \
 	-DCMAKE_INSTALL_PREFIX:PATH=/usr $(WS_ROOT)/src/; \
-	make
+	make && cp $(BR)/build-plugins/plugins/libsweetcomb.so $(WS_ROOT)/plugins
 else ifeq ($(OS_ID),centos)
 	@mkdir -p $(BR)/build-plugins/; cd $(BR)/build-plugins/; \
 	$(cmake) -DCMAKE_BUILD_TYPE=Debug \
@@ -323,3 +323,7 @@ docker: distclean
 
 docker-test:
 	@scripts/run_test.sh
+
+run:
+	export SR_PLUGINS_DIR=/home/stack/sweetcomb/plugins
+	/home/stack/sysrepo-0.7.7/build/src/sysrepo-plugind -d -l 4

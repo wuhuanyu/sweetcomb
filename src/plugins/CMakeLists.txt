@@ -60,7 +60,10 @@ set(PLUGINS_SOURCES
     sc_init.c
     sc_plugins.c
     sys_util.cpp
+    utils/utils.cpp
     vpp-oper/interface.cpp
+    utils/intfcmd.cpp
+    utils/intfutils.cpp
     ietf/ietf_interface.cpp
     openconfig/openconfig_interfaces.cpp
     ietf/ietf_nat.cpp
