@@ -15,4 +15,9 @@ int extract_intf_from_af (string intf, string &res);
 // check given interface is a loopback interface
 bool is_loopback_intf (string intf_name);
 
+//get vector of ips of given interface
+vec_str get_ips(string intf);
+
+//get interface
+
 #endif

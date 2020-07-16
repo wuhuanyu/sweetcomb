@@ -11,4 +11,5 @@ build-root/*
 .cproject
 .pydevproject
 .vscode/
+plugins
 

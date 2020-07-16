@@ -64,6 +64,7 @@ set(PLUGINS_SOURCES
     vpp-oper/interface.cpp
     utils/intfcmd.cpp
     utils/intfutils.cpp
+    ietf/dumb_ietf_cbs.cpp
     ietf/ietf_interface.cpp
     openconfig/openconfig_interfaces.cpp
     ietf/ietf_nat.cpp

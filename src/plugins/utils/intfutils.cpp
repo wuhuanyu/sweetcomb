@@ -1,5 +1,9 @@
 #include "intfutils.h"
 
+
+
+
+
 bool is_af_intf (string intf)
 {
   return intf.find ("host") != string::npos;
