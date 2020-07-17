@@ -62,7 +62,8 @@ set(PLUGINS_SOURCES
     sys_util.cpp
     utils/utils.cpp
     vpp-oper/interface.cpp
-    utils/intfcmd.cpp
+    structures/intf_structs.cpp
+    cmds/intfcmd.cpp
     utils/intfutils.cpp
     ietf/dumb_ietf_cbs.cpp
     ietf/ietf_interface.cpp

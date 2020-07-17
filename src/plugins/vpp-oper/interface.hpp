@@ -3,7 +3,7 @@
 
 #include <vom/dump_cmd.hpp>
 #include <vapi/interface.api.vapi.hpp>
-
+#include <vapi/ip.api.vapi.hpp>
 class interface_dump : public VOM::dump_cmd<vapi::Sw_interface_dump>
 {
 public:
@@ -30,7 +30,13 @@ private:
   std::string m_name; //interface name
 };
 
+class ip_address_dump:public VOM::dump_cmd<vapi::Ip_address_dump>{
 
+};
+
+class ip_dump:public VOM::dump_cmd<vapi::Ip_dump>{
+
+};
 
 
 

@@ -36,8 +36,9 @@
 #include "sc_plugins.h"
 #include "sys_util.h"
 #include "utils/utils.h"
-#include "utils/intfcmd.h"
+#include "cmds/intfcmd.h"
 #include "utils/intfutils.h"
+#include "structures/intf_structs.hpp"
 using namespace std;
 
 using VOM::HW;
@@ -49,76 +50,7 @@ using VOM::rc_t;
 using type_t = VOM::interface::type_t;
 using admin_state_t = VOM::interface::admin_state_t;
 
-class interface_builder
-{
-public:
-  interface_builder ()
-  {
-  }
 
-  shared_ptr<VOM::interface> build ()
-  {
-    if (m_name.empty () || m_type.empty ())
-      return nullptr;
-    return make_shared<interface> (m_name, type_t::from_string (m_type),
-                                   admin_state_t::from_int (m_state));
-  }
-
-  /* Getters */
-  string name ()
-  {
-    return m_name;
-  }
-
-  string type ()
-  {
-    return m_type;
-  }
-
-  /* Setters */
-  interface_builder &set_name (string n)
-  {
-    m_name = n;
-    return *this;
-  }
-
-  interface_builder &set_type (string t)
-  {
-    // ethernet
-    if (t == "iana-if-type:ethernetCsmacd")
-      m_type = "Ethernet";
-    // host af packet interface
-    else if (t.find ("afpacket") != string::npos ||
-             t.find ("af") != string::npos)
-      m_type = "host-";
-    else if (t.find ("loopback") != string::npos ||
-             t.find ("loop") != string::npos)
-      m_type = "loop";
-    return *this;
-  }
-
-  interface_builder &set_state (bool enable)
-  {
-    m_state = enable;
-    return *this;
-  }
-  bool get_state ()
-  {
-    return m_state;
-  }
-
-  std::string to_string ()
-  {
-    std::ostringstream os;
-    os << m_name << "," << m_type << "," << m_state;
-    return os.str ();
-  }
-
-private:
-  string m_name;
-  string m_type;
-  bool m_state;
-};
 
 /* @brief creation of ethernet devices */
 static int ietf_interface_create_cb (sr_session_ctx_t *session,
@@ -126,9 +58,8 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
                                      void *private_ctx)
 {
   UNUSED (private_ctx);
-  shared_ptr<VOM::interface> intf;
-  interface_builder builder;
   string if_name;
+  bool enabled=false;
   sr_change_iter_t *iter = nullptr;
   sr_xpath_ctx_t xpath_ctx;
   sr_val_t *old_val = nullptr;
@@ -176,14 +107,11 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
         if (sr_xpath_node_name_eq (new_val->xpath, "enabled"))
           {
             // strip interface name from xpath
-            string n = sr_xpath_key_value (new_val->xpath, "interface", "name",
+            if_name = sr_xpath_key_value (new_val->xpath, "interface", "name",
                                            &xpath_ctx);
-            builder.set_name(n);
            
             SRP_LOG_DBG ("set interface state %s",
                          (new_val->data.bool_val ? "enabled" : "disabled"));
-            // intf->set (admin_state_t::from_int (new_val->data.bool_val));
-            builder.set_state(new_val->data.bool_val);
             modify = true;
           }
         break;
@@ -195,16 +123,13 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
         if (sr_xpath_node_name_eq (new_val->xpath, "name"))
           {
             SRP_LOG_DBG ("builder set name:%s", new_val->data.string_val);
-            // set name
-            builder.set_name (new_val->data.string_val);
+            if_name=new_val->data.string_val;
             create = true;
           }
         else if (sr_xpath_node_name_eq (new_val->xpath, "type"))
           {
-            // if leaf=="type"
-            // set type
+            //todo add type
             SRP_LOG_DBG ("builder set type:%s", new_val->data.string_val);
-            builder.set_type (new_val->data.string_val);
           }
         else if (sr_xpath_node_name_eq (new_val->xpath, "enabled"))
           {
@@ -212,15 +137,15 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
             // set state
             SRP_LOG_DBG ("set state %s:",
                          new_val->data.bool_val ? "enabled" : "disabled");
-            builder.set_state (new_val->data.bool_val);
+            enabled=new_val->data.bool_val;
           }
         break;
       case SR_OP_DELETED:
         SRP_LOG_DBG_MSG ("operation is to delete");
         if (sr_xpath_node_name_eq (old_val->xpath, "name"))
           {
-            SRP_LOG_DBG_MSG ("set name");
-            builder.set_name (old_val->data.string_val);
+            if_name=old_val->data.string_val;
+            SRP_LOG_DBG("del interface %s",if_name.c_str());
             remove = true;
           }
         break;
@@ -237,11 +162,10 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
 
   if (create)
     {
-      string intf_name = builder.name ();
       // try to split intf_name
-      if (is_af_intf(intf_name))
+      string& intf_name=if_name;
+      if (is_af_intf(if_name))
         {
-          builder.set_type ("AFPACKET");
           vec_str splited = split (intf_name, '-');
           if (splited.size () != 2)
             {
@@ -261,12 +185,12 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
               rc = SR_ERR_INVAL_ARG;
               goto nothing_todo;
             }
-          if (builder.get_state ())
+          if (enabled)
             {
               rv = set_intf_status (intf_name, true);
               if (rv != 0)
                 {
-                  SRP_LOG_ERR ("Cannot enable interface %s", intf_name);
+                  SRP_LOG_ERR ("Cannot enable interface %s", intf_name.c_str());
                   rc = SR_ERR_INTERNAL;
                   goto nothing_todo;
                 }
@@ -277,15 +201,15 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
     }
   else if (modify)
     {
-      SRP_LOG_DBG ("operation is to modify %s set to %s", builder.name ().c_str(),
-                   (builder.get_state () ? "enable" : "disable"));
-      string intf = builder.name();
-      int rv = set_intf_status (intf, builder.get_state ());
+      SRP_LOG_DBG ("operation is to modify %s set to %s", if_name.c_str(),
+                   (enabled ? "enable" : "disable"));
+                   
+      int rv = set_intf_status (if_name, enabled);
     }
   else if (remove)
     {
-      SRP_LOG_INF ("deleting interface '%s'", builder.name ().c_str ());
-      OM::remove (builder.name ());
+      SRP_LOG_INF ("deleting interface '%s'", if_name.c_str ());
+      //todo del interface
     }
 
   sr_free_change_iter (iter);
@@ -299,59 +223,29 @@ nothing_todo:
   return rc;
 }
 
-static int ipv46_config_add_remove (const string &if_name, const string &addr,
-                                    uint8_t prefix, bool add)
+static int ipv46_config_add_remove (const string &intf_name, const string &addr,
+                                    int prefix_length, bool add)
 {
-  shared_ptr<l3_binding> l3;
-  shared_ptr<interface> intf;
   rc_t rc = rc_t::OK;
   SRP_LOG_DBG ("in function:%s", __FUNCTION__);
 
-  intf = interface::find (if_name);
-  if (nullptr == intf)
-    {
-      SRP_LOG_ERR ("cannot find interface %s", if_name);
-      return SR_ERR_INVAL_ARG;
-    }
-  else
-    {
-      SRP_LOG_DBG ("found interface %s", intf->name ().c_str ());
-    }
-
-  try
-    {
-      VOM::route::prefix_t pfx (addr, prefix);
-      l3 = make_shared<l3_binding> (*intf, pfx);
-
-#define KEY(l3) "l3_" + l3->itf ().name () + "_" + l3->prefix ().to_string ()
-      if (add)
-        {
-          SRP_LOG_DBG_MSG ("Adding");
-          /* Commit the changes to VOM DB and VPP */
-          SRP_LOG_DBG ("Writing to om:%s", KEY (l3));
-          if (OM::write (KEY (l3), *l3) != rc_t::OK)
-            {
-              SRP_LOG_ERR_MSG ("Fail writing changes to VPP");
-              return SR_ERR_OPERATION_FAILED;
-            }
-          else
-            {
-              SRP_LOG_DBG ("Writing to om:%s successfully", KEY (l3));
-            }
-        }
-      else
-        {
-          SRP_LOG_DBG_MSG ("Deleting");
-          /* Remove l3 thanks to its unique identifier */
-          OM::remove (KEY (l3));
-        }
-#undef KEY
-    }
-  catch (std::exception &exc)
-    { // catch boost exception from prefix_t
-      SRP_LOG_ERR ("Error: %s", exc.what ());
+   int rv=-1;
+  //todo check if interface exsits
+  if(add){
+    SRP_LOG_DBG("add ip %s to intf %s",addr.c_str(),intf_name.c_str());
+    rv=add_intf_ip(intf_name,addr,prefix_length);
+    if(rv!=0){
+      SRP_LOG_ERR("add ip %s to intf %s failed",addr.c_str(),intf_name.c_str());
       return SR_ERR_OPERATION_FAILED;
     }
+  }else{
+    SRP_LOG_DBG("delete ip %s from intf %s",addr.c_str(),intf_name.c_str());
+    rv=del_intf_ip(intf_name,addr,prefix_length);
+    if(rv!=0){
+      SRP_LOG_ERR("del ip %s from intf %s failed",addr.c_str(),intf_name.c_str());
+    }
+    return SR_ERR_OPERATION_FAILED;
+  }
 
   return SR_ERR_OK;
 }
@@ -459,21 +353,28 @@ static int ietf_interface_ipv46_address_change_cb (sr_session_ctx_t *session,
         switch (op)
           {
           case SR_OP_CREATED:
-            SRP_LOG_DBG_MSG ("operation is to create ip address");
             create = true;
             parse_interface_ipv46_address (new_val, new_addr, new_prefix);
+            SRP_LOG_DBG("add ip %s/%d to intf %s",new_addr.c_str(),new_prefix,if_name.c_str());
             break;
           case SR_OP_MODIFIED:
+            //todo cannot modify ip 
             create = true;
             del = true;
-            SRP_LOG_DBG_MSG ("operation is to modify ip address");
             parse_interface_ipv46_address (old_val, old_addr, old_prefix);
             parse_interface_ipv46_address (new_val, new_addr, new_prefix);
+            SRP_LOG_DBG("modify intf %s ip %s/%d to %s/%d",
+            if_name.c_str(),
+            old_addr.c_str(),
+            old_prefix,
+            new_addr.c_str(),
+            new_prefix
+            );
             break;
           case SR_OP_DELETED:
             del = true;
-            SRP_LOG_DBG_MSG ("operation is to delete ip address");
             parse_interface_ipv46_address (old_val, old_addr, old_prefix);
+            SRP_LOG_DBG("from intf %s del ip %s/%d",if_name.c_str(),old_addr.c_str(),old_prefix);
             break;
           default:
             break;
@@ -733,15 +634,15 @@ int ietf_interface_init (sc_plugin_main_t *pm)
       goto error;
     }
 
-  //   rc = sr_subtree_change_subscribe (
-  //       pm->session,
-  //       "/ietf-interfaces:interfaces/interface/ietf-ip:ipv4/address",
-  //       ietf_interface_ipv46_address_change_cb, nullptr, 99,
-  //       SR_SUBSCR_CTX_REUSE, &pm->subscription);
-  //   if (SR_ERR_OK != rc)
-  //     {
-  //       goto error;
-  //     }
+    rc = sr_subtree_change_subscribe (
+        pm->session,
+        "/ietf-interfaces:interfaces/interface/ietf-ip:ipv4/address",
+        ietf_interface_ipv46_address_change_cb, nullptr, 99,
+        SR_SUBSCR_CTX_REUSE, &pm->subscription);
+    if (SR_ERR_OK != rc)
+      {
+        goto error;
+      }
 
   //   rc = sr_subtree_change_subscribe (
   //       pm->session,
@@ -785,5 +686,5 @@ void ietf_interface_exit (__attribute__ ((unused)) sc_plugin_main_t *pm)
 {
 }
 
-// SC_INIT_FUNCTION (ietf_interface_init);
-// SC_EXIT_FUNCTION (ietf_interface_exit);
+SC_INIT_FUNCTION (ietf_interface_init);
+SC_EXIT_FUNCTION (ietf_interface_exit);
