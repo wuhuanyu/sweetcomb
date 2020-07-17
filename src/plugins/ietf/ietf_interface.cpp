@@ -26,11 +26,6 @@
 #include <exception>
 #include <memory>
 
-#include <vom/interface.hpp>
-#include <vom/om.hpp>
-#include <vom/l3_binding.hpp>
-#include <vom/route.hpp>
-
 #include <vpp-oper/interface.hpp>
 
 #include "sc_plugins.h"
@@ -39,16 +34,10 @@
 #include "cmds/intfcmd.h"
 #include "utils/intfutils.h"
 #include "structures/intf_structs.hpp"
+
 using namespace std;
 
-using VOM::HW;
-using VOM::interface;
-using VOM::l3_binding;
-using VOM::OM;
-using VOM::rc_t;
-
-using type_t = VOM::interface::type_t;
-using admin_state_t = VOM::interface::admin_state_t;
+using namespace cmd;
 
 /* @brief creation of ethernet devices */
 static int ietf_interface_create_cb (sr_session_ctx_t *session,
@@ -63,7 +52,7 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
   sr_val_t *old_val = nullptr;
   sr_val_t *new_val = nullptr;
   sr_change_oper_t op;
-  bool create = false, remove = false, modify = false;
+  bool create = false, remove_L = false, modify = false;
   int rc;
 
   SRP_LOG_INF ("In %s", __FUNCTION__);

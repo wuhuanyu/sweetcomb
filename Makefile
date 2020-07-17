@@ -295,17 +295,18 @@ endif
 
 install-models:
 	@cd src/plugins/yang/ietf; \
-	sysrepoctl --install --yang=iana-if-type@2017-01-19.yang > /dev/null; \
-	sysrepoctl --install --yang=ietf-interfaces@2018-02-20.yang > /dev/null; \
-	sysrepoctl --install --yang=ietf-ip@2014-06-16.yang > /dev/null; \
-	sysrepoctl --install --yang=ietf-nat@2017-11-16.yang > /dev/null; \
-	sysrepoctl --install --yang=ietf-routing.yang; \
+	sysrepoctl --install --yang=iana-if-type@2017-01-19.yang; \
+	sysrepoctl --install --yang=ietf-interfaces@2018-02-20.yang; \
+	sysrepoctl --install --yang=ietf-ip@2014-06-16.yang; \
+	sysrepoctl --install --yang=ietf-nat@2017-11-16.yang; \
+	sysrepoctl --install --yang=iana-routing-types@2018-10-29.yang;\
+	sysrepoctl --install --yang=ietf-ipv4-unicast-routing@2018-03-13.yang;\
 	sysrepoctl -e if-mib -m ietf-interfaces;
 	@cd src/plugins/yang/openconfig; \
 	sysrepoctl -S --install --yang=openconfig-interfaces@2018-08-07.yang > /dev/null; \
 
 uninstall-models:
-	@sysrepoctl -u --module=ietf-routing,ietf-interfaces,ietf-nat,iana-if-type,ietf-ip,openconfig-interfaces;
+	@sysrepoctl -u --module=ietf-routing,ietf-interfaces,ietf-nat,iana-if-type,ietf-ip,openconfig-interfaces,ietf-ipv4-unicast-routing;
 	# @sysrepoctl -u -m ietf-ip > /dev/null; \
 	# sysrepoctl -u -m ietf-routing >/dev/null; \
 	# sysrepoctl -u -m openconfig-interfaces > /dev/null; \
