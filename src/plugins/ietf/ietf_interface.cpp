@@ -90,11 +90,11 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
   {
     if (old_val)
       {
-        SRP_LOG_DBG ("Old value is not null,xpath:%s", old_val->xpath);
+        SRP_LOG_DBG ("Old val xpath:%s", old_val->xpath);
       }
-    else
+    if(new_val)
       {
-        SRP_LOG_DBG ("Old value null!!,new value xpath:%s", new_val->xpath);
+        SRP_LOG_DBG ("new value xpath:%s", new_val->xpath);
       }
     SRP_LOG_INF ("Change xpath: %s",
                  old_val ? old_val->xpath : new_val->xpath);
@@ -110,6 +110,7 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
 
             SRP_LOG_DBG ("set interface state %s",
                          (new_val->data.bool_val ? "enabled" : "disabled"));
+            enabled=new_val->data.bool_val;
             modify = true;
           }
         break;
@@ -129,7 +130,6 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
             // todo add type
             SRP_LOG_DBG ("builder set type:%s", new_val->data.string_val);
           }
-        // todo ipv4 enable和interface enable冲突了
         else if (sr_xpath_node_name_eq (new_val->xpath, "enabled"))
           {
             // if leaf=="enabled"
@@ -649,16 +649,6 @@ int ietf_interface_init (sc_plugin_main_t *pm)
     {
       goto error;
     }
-
-  //   rc = sr_subtree_change_subscribe (
-  //       pm->session,
-  //       "/ietf-interfaces:interfaces/interface/ietf-ip:ipv6/address",
-  //       ietf_interface_ipv46_address_change_cb, nullptr, 98,
-  //       SR_SUBSCR_CTX_REUSE, &pm->subscription);
-  //   if (SR_ERR_OK != rc)
-  //     {
-  //       goto error;
-  //     }
 
   rc = sr_dp_get_items_subscribe (pm->session,
                                   "/ietf-interfaces:interfaces-state",

@@ -299,6 +299,7 @@ install-models:
 	sysrepoctl --install --yang=ietf-interfaces@2018-02-20.yang > /dev/null; \
 	sysrepoctl --install --yang=ietf-ip@2014-06-16.yang > /dev/null; \
 	sysrepoctl --install --yang=ietf-nat@2017-11-16.yang > /dev/null; \
+	sysrepoctl --install --yang=ietf-routing; \
 	sysrepoctl -e if-mib -m ietf-interfaces;
 	@cd src/plugins/yang/openconfig; \
 	sysrepoctl -S --install --yang=openconfig-interfaces@2018-08-07.yang > /dev/null; \
@@ -308,6 +309,7 @@ uninstall-models:
 	sysrepoctl -u -m openconfig-interfaces > /dev/null; \
 	sysrepoctl -u -m ietf-nat > /dev/null; \
 	sysrepoctl -u -m iana-if-type > /dev/null; \
+	sysrepoctl -u -m ietf-yang >/dev/null; \
 	sysrepoctl -u -m ietf-interfaces > /dev/null; \
 
 clean:
