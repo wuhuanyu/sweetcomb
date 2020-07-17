@@ -50,8 +50,6 @@ using VOM::rc_t;
 using type_t = VOM::interface::type_t;
 using admin_state_t = VOM::interface::admin_state_t;
 
-
-
 /* @brief creation of ethernet devices */
 static int ietf_interface_create_cb (sr_session_ctx_t *session,
                                      const char *xpath, sr_notif_event_t event,
@@ -59,7 +57,7 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
 {
   UNUSED (private_ctx);
   string if_name;
-  bool enabled=false;
+  bool enabled = false;
   sr_change_iter_t *iter = nullptr;
   sr_xpath_ctx_t xpath_ctx;
   sr_val_t *old_val = nullptr;
@@ -108,8 +106,8 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
           {
             // strip interface name from xpath
             if_name = sr_xpath_key_value (new_val->xpath, "interface", "name",
-                                           &xpath_ctx);
-           
+                                          &xpath_ctx);
+
             SRP_LOG_DBG ("set interface state %s",
                          (new_val->data.bool_val ? "enabled" : "disabled"));
             modify = true;
@@ -123,29 +121,30 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
         if (sr_xpath_node_name_eq (new_val->xpath, "name"))
           {
             SRP_LOG_DBG ("builder set name:%s", new_val->data.string_val);
-            if_name=new_val->data.string_val;
+            if_name = new_val->data.string_val;
             create = true;
           }
         else if (sr_xpath_node_name_eq (new_val->xpath, "type"))
           {
-            //todo add type
+            // todo add type
             SRP_LOG_DBG ("builder set type:%s", new_val->data.string_val);
           }
+        // todo ipv4 enable和interface enable冲突了
         else if (sr_xpath_node_name_eq (new_val->xpath, "enabled"))
           {
             // if leaf=="enabled"
             // set state
             SRP_LOG_DBG ("set state %s:",
                          new_val->data.bool_val ? "enabled" : "disabled");
-            enabled=new_val->data.bool_val;
+            enabled = new_val->data.bool_val;
           }
         break;
       case SR_OP_DELETED:
         SRP_LOG_DBG_MSG ("operation is to delete");
         if (sr_xpath_node_name_eq (old_val->xpath, "name"))
           {
-            if_name=old_val->data.string_val;
-            SRP_LOG_DBG("del interface %s",if_name.c_str());
+            if_name = old_val->data.string_val;
+            SRP_LOG_DBG ("del interface %s", if_name.c_str ());
             remove = true;
           }
         break;
@@ -159,12 +158,11 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
     sr_free_val (new_val);
   }
 
-
   if (create)
     {
       // try to split intf_name
-      string& intf_name=if_name;
-      if (is_af_intf(if_name))
+      string &intf_name = if_name;
+      if (is_af_intf (if_name))
         {
           vec_str splited = split (intf_name, '-');
           if (splited.size () != 2)
@@ -190,7 +188,8 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
               rv = set_intf_status (intf_name, true);
               if (rv != 0)
                 {
-                  SRP_LOG_ERR ("Cannot enable interface %s", intf_name.c_str());
+                  SRP_LOG_ERR ("Cannot enable interface %s",
+                               intf_name.c_str ());
                   rc = SR_ERR_INTERNAL;
                   goto nothing_todo;
                 }
@@ -201,15 +200,15 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
     }
   else if (modify)
     {
-      SRP_LOG_DBG ("operation is to modify %s set to %s", if_name.c_str(),
+      SRP_LOG_DBG ("operation is to modify %s set to %s", if_name.c_str (),
                    (enabled ? "enable" : "disable"));
-                   
+
       int rv = set_intf_status (if_name, enabled);
     }
   else if (remove)
     {
       SRP_LOG_INF ("deleting interface '%s'", if_name.c_str ());
-      //todo del interface
+      // todo del interface
     }
 
   sr_free_change_iter (iter);
@@ -223,29 +222,38 @@ nothing_todo:
   return rc;
 }
 
-static int ipv46_config_add_remove (const string &intf_name, const string &addr,
-                                    int prefix_length, bool add)
+static int ipv46_config_add_remove (const string &intf_name,
+                                    const string &addr, int prefix_length,
+                                    bool add)
 {
   rc_t rc = rc_t::OK;
   SRP_LOG_DBG ("in function:%s", __FUNCTION__);
 
-   int rv=-1;
-  //todo check if interface exsits
-  if(add){
-    SRP_LOG_DBG("add ip %s to intf %s",addr.c_str(),intf_name.c_str());
-    rv=add_intf_ip(intf_name,addr,prefix_length);
-    if(rv!=0){
-      SRP_LOG_ERR("add ip %s to intf %s failed",addr.c_str(),intf_name.c_str());
+  int rv = -1;
+  // todo check if interface exsits
+  if (add)
+    {
+      SRP_LOG_DBG ("add ip %s to intf %s", addr.c_str (), intf_name.c_str ());
+      rv = add_intf_ip (intf_name, addr, prefix_length);
+      if (rv != 0)
+        {
+          SRP_LOG_ERR ("add ip %s to intf %s failed", addr.c_str (),
+                       intf_name.c_str ());
+          return SR_ERR_OPERATION_FAILED;
+        }
+    }
+  else
+    {
+      SRP_LOG_DBG ("delete ip %s from intf %s", addr.c_str (),
+                   intf_name.c_str ());
+      rv = del_intf_ip (intf_name, addr, prefix_length);
+      if (rv != 0)
+        {
+          SRP_LOG_ERR ("del ip %s from intf %s failed", addr.c_str (),
+                       intf_name.c_str ());
+        }
       return SR_ERR_OPERATION_FAILED;
     }
-  }else{
-    SRP_LOG_DBG("delete ip %s from intf %s",addr.c_str(),intf_name.c_str());
-    rv=del_intf_ip(intf_name,addr,prefix_length);
-    if(rv!=0){
-      SRP_LOG_ERR("del ip %s from intf %s failed",addr.c_str(),intf_name.c_str());
-    }
-    return SR_ERR_OPERATION_FAILED;
-  }
 
   return SR_ERR_OK;
 }
@@ -355,26 +363,24 @@ static int ietf_interface_ipv46_address_change_cb (sr_session_ctx_t *session,
           case SR_OP_CREATED:
             create = true;
             parse_interface_ipv46_address (new_val, new_addr, new_prefix);
-            SRP_LOG_DBG("add ip %s/%d to intf %s",new_addr.c_str(),new_prefix,if_name.c_str());
+            SRP_LOG_DBG ("add ip %s/%d to intf %s", new_addr.c_str (),
+                         new_prefix, if_name.c_str ());
             break;
           case SR_OP_MODIFIED:
-            //todo cannot modify ip 
+            // todo cannot modify ip
             create = true;
             del = true;
             parse_interface_ipv46_address (old_val, old_addr, old_prefix);
             parse_interface_ipv46_address (new_val, new_addr, new_prefix);
-            SRP_LOG_DBG("modify intf %s ip %s/%d to %s/%d",
-            if_name.c_str(),
-            old_addr.c_str(),
-            old_prefix,
-            new_addr.c_str(),
-            new_prefix
-            );
+            SRP_LOG_DBG ("modify intf %s ip %s/%d to %s/%d", if_name.c_str (),
+                         old_addr.c_str (), old_prefix, new_addr.c_str (),
+                         new_prefix);
             break;
           case SR_OP_DELETED:
             del = true;
             parse_interface_ipv46_address (old_val, old_addr, old_prefix);
-            SRP_LOG_DBG("from intf %s del ip %s/%d",if_name.c_str(),old_addr.c_str(),old_prefix);
+            SRP_LOG_DBG ("from intf %s del ip %s/%d", if_name.c_str (),
+                         old_addr.c_str (), old_prefix);
             break;
           default:
             break;
@@ -634,15 +640,15 @@ int ietf_interface_init (sc_plugin_main_t *pm)
       goto error;
     }
 
-    rc = sr_subtree_change_subscribe (
-        pm->session,
-        "/ietf-interfaces:interfaces/interface/ietf-ip:ipv4/address",
-        ietf_interface_ipv46_address_change_cb, nullptr, 99,
-        SR_SUBSCR_CTX_REUSE, &pm->subscription);
-    if (SR_ERR_OK != rc)
-      {
-        goto error;
-      }
+  rc = sr_subtree_change_subscribe (
+      pm->session,
+      "/ietf-interfaces:interfaces/interface/ietf-ip:ipv4/address",
+      ietf_interface_ipv46_address_change_cb, nullptr, 99, SR_SUBSCR_CTX_REUSE,
+      &pm->subscription);
+  if (SR_ERR_OK != rc)
+    {
+      goto error;
+    }
 
   //   rc = sr_subtree_change_subscribe (
   //       pm->session,
