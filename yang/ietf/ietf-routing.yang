@@ -1,4 +1,8 @@
    module ietf-routing {
+     /**
+     https://tools.ietf.org/html/rfc8022#appendix-A.1
+     https://tools.ietf.org/html/rfc7950#section-7.18
+     */
 
      namespace "urn:ietf:params:xml:ns:yang:ietf-routing";
 
