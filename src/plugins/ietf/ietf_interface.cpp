@@ -682,5 +682,5 @@ void ietf_interface_exit (__attribute__ ((unused)) sc_plugin_main_t *pm)
 {
 }
 
-SC_INIT_FUNCTION (ietf_interface_init);
-SC_EXIT_FUNCTION (ietf_interface_exit);
+// SC_INIT_FUNCTION (ietf_interface_init);
+// SC_EXIT_FUNCTION (ietf_interface_exit);

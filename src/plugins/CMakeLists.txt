@@ -67,6 +67,7 @@ set(PLUGINS_SOURCES
     cmds/routecmd.cpp
     utils/intfutils.cpp
     ietf/dumb_ietf_cbs.cpp
+    ietf/dumb_ietf_routing.cpp
 
     ietf/ietf_interface.cpp
     ietf/ietf_routing.cpp
