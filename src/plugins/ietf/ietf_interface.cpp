@@ -25,6 +25,10 @@
 #include <string>
 #include <exception>
 #include <memory>
+#include <vom/interface.hpp>
+#include <vom/om.hpp>
+#include <vom/l3_binding.hpp>
+#include <vom/route.hpp>
 
 #include <vpp-oper/interface.hpp>
 
@@ -33,7 +37,14 @@
 #include "utils/utils.h"
 #include "cmds/intfcmd.h"
 #include "utils/intfutils.h"
-#include "structures/intf_structs.hpp"
+#include "structures/interface.hpp"
+
+
+using VOM::HW;
+using VOM::interface;
+using VOM::l3_binding;
+using VOM::OM;
+using VOM::rc_t;
 
 using namespace std;
 
@@ -52,7 +63,7 @@ static int ietf_interface_create_cb (sr_session_ctx_t *session,
   sr_val_t *old_val = nullptr;
   sr_val_t *new_val = nullptr;
   sr_change_oper_t op;
-  bool create = false, remove_L = false, modify = false;
+  bool create = false, remove = false, modify = false;
   int rc;
 
   SRP_LOG_INF ("In %s", __FUNCTION__);
