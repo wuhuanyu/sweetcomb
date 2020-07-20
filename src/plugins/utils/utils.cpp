@@ -77,7 +77,6 @@ int run_vppctl_command(const vec_str &cmds)
     }else{
       sock_file="/run/vpp/cli.sock";
     }
-    std::cout<<"sock file: "<<sock_file<<std::endl;
   }
 
   string cmd;
