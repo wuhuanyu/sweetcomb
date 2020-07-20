@@ -3,7 +3,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 vppctl=`which vppctl`
 vpp=`which vpp`
-systemctl stop vpp
+systemctl restart vpp
+# systemctl stop vpp
 
 pgrep "vpp"|xargs kill -9
 

@@ -4,9 +4,13 @@
 #include <iostream>
 #include <sstream>
 #include "utils.h"
+#include <cstdlib>
+
 
 using string = std::string;
 using vec_str = std::vector<string>;
+
+char *sock_file=nullptr;
 
 string concat_to_str (const vec_str &strs, char c)
 {
@@ -63,5 +67,34 @@ int run_command(const vec_str &cmds)
   return run_command(cmd);
 }
 
+//todo very ugly implementation
+int run_vppctl_command(const vec_str &cmds)
+{
+  if(nullptr==sock_file){
+    //read sock env
+    if(std::getenv("SOCK")){
+      sock_file=std::getenv("SOCK");
+    }else{
+      sock_file="/run/vpp/cli.sock";
+    }
+    std::cout<<"sock file: "<<sock_file<<std::endl;
+  }
 
+  string cmd;
+  std::stringstream ss;
+  ss<<"vppctl -s "<<sock_file<<" ";
+  for(int i=0;i<cmds.size();i++){
+    ss<<cmds[i];
+    if(cmds.size()-1==i) continue;
+    ss<<" ";
+  }
+  cmd=ss.str();
+  return run_command(cmd.c_str());
+}
+
+
+// int get_env(const char *env)
+// {
+
+// }
 

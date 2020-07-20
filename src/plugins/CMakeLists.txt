@@ -63,11 +63,13 @@ set(PLUGINS_SOURCES
     utils/utils.cpp
     vpp-oper/interface.cpp
     structures/interface.cpp
-    ietf/ietf_routing.cpp
     cmds/intfcmd.cpp
+    cmds/routecmd.cpp
     utils/intfutils.cpp
     ietf/dumb_ietf_cbs.cpp
+
     ietf/ietf_interface.cpp
+    ietf/ietf_routing.cpp
     openconfig/openconfig_interfaces.cpp
     ietf/ietf_nat.cpp
 )
