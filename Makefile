@@ -300,6 +300,7 @@ install-models:
 	sysrepoctl --install --yang=ietf-ip@2014-06-16.yang; \
 	sysrepoctl --install --yang=ietf-nat@2017-11-16.yang; \
 	sysrepoctl --install --yang=iana-routing-types@2018-10-29.yang;\
+	sysrepoctl --install --yang=ietf-routing@2018-03-13.yang;\
 	sysrepoctl --install --yang=ietf-ipv4-unicast-routing@2018-03-13.yang;\
 	sysrepoctl -e if-mib -m ietf-interfaces;
 	@cd src/plugins/yang/openconfig; \

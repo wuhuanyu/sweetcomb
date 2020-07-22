@@ -38,6 +38,7 @@
 #include "cmds/intfcmd.h"
 #include "utils/intfutils.h"
 #include "structures/interface.hpp"
+#include "parser.hpp"
 
 
 using VOM::HW;
@@ -49,6 +50,7 @@ using VOM::rc_t;
 using namespace std;
 
 using namespace cmd;
+using namespace parser;
 
 /* @brief creation of ethernet devices */
 static int ietf_interface_create_cb (sr_session_ctx_t *session,
@@ -258,34 +260,7 @@ static int ipv46_config_add_remove (const string &intf_name,
   return SR_ERR_OK;
 }
 
-static void parse_interface_ipv46_address (sr_val_t *val, string &addr,
-                                           uint8_t &prefix)
-{
-  if (val == nullptr)
-    throw std::runtime_error ("Null pointer");
 
-  if (SR_LIST_T == val->type)
-    {
-      /* create on list item - reset state vars */
-      addr.clear ();
-    }
-  else
-    {
-      if (sr_xpath_node_name_eq (val->xpath, "ip"))
-        {
-          addr = val->data.string_val;
-        }
-      else if (sr_xpath_node_name_eq (val->xpath, "prefix-length"))
-        {
-          prefix = val->data.uint8_val;
-        }
-      else if (sr_xpath_node_name_eq (val->xpath, "netmask"))
-        {
-          prefix = utils::netmask_to_plen (
-              boost::asio::ip::address::from_string (val->data.string_val));
-        }
-    }
-}
 
 /**
  * @brief Callback to be called by any config change in subtrees

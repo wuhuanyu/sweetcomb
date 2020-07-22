@@ -1,8 +1,8 @@
 <!-- XML for edit-config RPC to set an IP using ietf-interfaces -->
 <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
     <interface>
-        <name>host-vppout</name>
-        <description>vppout</description>
+        <name>loop0</name>
+        <description>loop0</description>
         <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
         <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip">
             <enabled>true</enabled>

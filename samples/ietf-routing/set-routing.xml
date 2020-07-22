@@ -6,7 +6,7 @@
             <static-routes>
                 <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ipv4-unicast-routing">
                     <route>
-                        <destination-prefix>10.0.3.1/24</destination-prefix>
+                        <destination-prefix>10.0.3.0/24</destination-prefix>
                         <next-hop>
                             <next-hop-address>10.0.2.2</next-hop-address>
                         </next-hop>                        
