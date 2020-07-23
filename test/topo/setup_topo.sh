@@ -3,21 +3,25 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 vppctl=`which vppctl`
 vpp=`which vpp`
-systemctl restart vpp
-# systemctl stop vpp
 
 pgrep "vpp"|xargs kill -9
 
-conf1="$DIR/vpp1.conf"
+systemctl stop vpp
+
+# conf1="$DIR/vpp1.conf"
+conf1="/etc/vpp/startup.conf"
 conf2="$DIR/vpp2.conf"
-$vpp -c $conf1
+# $vpp -c $conf1
+systemctl restart vpp
 $vpp -c $conf2
 
-sock1="/run/vpp/cli-vpp1.sock"
+sock1="/run/vpp/cli.sock"
+# sock1="/run/vpp/cli-vpp1.sock"
 sock2="/run/vpp/cli-vpp2.sock"
 
 vppctl2="${vppctl} -s ${sock2}"
-vppctl1="${vppctl} -s ${sock1}"
+# vppctl1="${vppctl} -s ${sock1}"
+vppctl1=$vppctl
 
 
 
@@ -70,7 +74,7 @@ $vppctl1 create host-interface name vpp1vpp2
 $vppctl1 set int state host-vpp1vpp2 up 
 $vppctl1 set int ip address host-vpp1vpp2 10.0.2.1/24
 #to be configured by sweetcomb
-#$vppctl1 ip route add 10.0.3.0/24 via 10.0.2.2
+$vppctl1 ip route add 10.0.3.0/24 via 10.0.2.2
 
 $vppctl2 create host-interface name vpp2vpp1
 $vppctl2 set int state host-vpp2vpp1 up
