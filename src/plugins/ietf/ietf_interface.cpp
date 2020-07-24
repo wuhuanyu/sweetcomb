@@ -54,78 +54,7 @@ using namespace parser;
 
 class listener : public VOM::interface::stat_listener
 {
-  sr_val_t *val=nullptr;
-  const char *xpath=nullptr;
-  int cnt=0;
-public:
-
-  void set_value(sr_val_t *v,const char *path){
-    val=v;
-    xpath=path;
-    cnt=0;
-  }
-  int get_count(){
-    return cnt;
-  }
-  ~listener ()
-  {
-  }
-  void handle_interface_stat (const VOM::interface &itf)
-  {
-    if(nullptr==val){
-    std::cout << itf.name () << " " << itf.get_stats ();
-    return;
-    }
-    auto stats=itf.get_stats();
-    // if/rx
-    sr_val_build_xpath (&val[cnt], "%s/in-octets", xpath, 5);
-    val[cnt].type = SR_UINT64_T;
-    val[cnt].data.uint64_val = stats.m_rx.bytes;
-    cnt++;
-
-    // if/rx-unicast
-    sr_val_build_xpath (&val[cnt], "%s/in-unicast-pkts", xpath, 5);
-    val[cnt].type = SR_UINT64_T;
-    val[cnt].data.uint64_val = stats.m_rx_unicast.packets;
-    cnt++;
-
-    // if/rx-broadcast
-    sr_val_build_xpath (&val[cnt], "%s/in-broadcast-pkts", xpath, 5);
-    val[cnt].type = SR_UINT64_T;
-    val[cnt].data.uint64_val = stats.m_rx_broadcast.packets;
-    cnt++;
-
-    // if/rx-multicast
-    sr_val_build_xpath (&val[cnt], "%s/in-multicast-pkts", xpath, 5);
-    val[cnt].type = SR_UINT64_T;
-    val[cnt].data.uint64_val = stats.m_rx_multicast.packets;
-    cnt++;
-
-    // if/tx
-    sr_val_build_xpath (&val[cnt], "%s/out-octets", xpath, 5);
-    val[cnt].type = SR_UINT64_T;
-    val[cnt].data.uint64_val = stats.m_tx.bytes;
-    std::cout << stats.m_tx.bytes << std::endl;
-    cnt++;
-
-    // if/tx-unicast
-    sr_val_build_xpath (&val[cnt], "%s/out-unicast-pkts", xpath, 5);
-    val[cnt].type = SR_UINT64_T;
-    val[cnt].data.uint64_val = stats.m_tx_unicast.packets;
-    cnt++;
-
-    // if/tx-broadcast
-    sr_val_build_xpath (&val[cnt], "%s/out-broadcast-pkts", xpath, 5);
-    val[cnt].type = SR_UINT64_T;
-    val[cnt].data.uint64_val = stats.m_tx_broadcast.packets;
-    cnt++;
-
-    // if/tx-multicast
-    sr_val_build_xpath (&val[cnt], "%s/out-multicast-pkts", xpath, 5);
-    val[cnt].type = SR_UINT64_T;
-    val[cnt].data.uint64_val = stats.m_tx_multicast.packets;
-    cnt++;
-  }
+  void handle_interface_stat (const VOM::interface &itf){}
 };
 
 listener *l=new listener();
@@ -623,15 +552,12 @@ static int interface_statistics_cb (const char *xpath, sr_val_t **values,
     }
 
 
-
-
   /* allocate array of values to be returned */
   rc = sr_new_values (vc, &val);
   if (0 != rc)
     goto nothing_todo;
 
-  // l->set_value (val, xpath);
-  // interface->enable_stats (l);
+  interface->enable_stats (l);
 
   HW::read_stats ();
   stats = interface->get_stats ();
@@ -686,8 +612,8 @@ static int interface_statistics_cb (const char *xpath, sr_val_t **values,
   cnt++;
 
   *values = val;
-  *values_cnt = l->get_count();
-  // *values_cnt =cnt;
+  // *values_cnt = l->get_count();
+  *values_cnt =cnt;
   // interface->disable_stats();
 
   return SR_ERR_OK;
