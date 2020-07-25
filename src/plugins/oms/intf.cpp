@@ -12,22 +12,23 @@
 #include <vom/tap_interface.hpp>
 #include <memory>
 #include <vom/l3_binding.hpp>
+#include "common.hpp"
 #include "utils/intfutils.h"
-#include <iostream>
 #include "db.hpp"
 
 namespace oms {
     namespace intf {
-#define VALID_IP_PREFIX_LEN(len) (len>0&&len<32)
+
         using interface = VOM::interface;
         using OM = VOM::OM;
         using rc_t = VOM::rc_t;
         using admin_state_t = interface::admin_state_t;
         using l3_binding = VOM::l3_binding;
+        using oms::rc;
 
         int create_af_packet_intf(const std::string &host_intf, bool up) {
-            std::string intf_name = extract_intf_name(host_intf);
-            if (intf_name.empty()) return err_invalid_arg;
+            std::string intf_name;
+            if(extract_intf_name(host_intf,intf_name)!=rc::success) return err_invalid_arg;
             interface::admin_state_t state =
                     (up ? interface::admin_state_t::UP : interface::admin_state_t::DOWN);
             std::shared_ptr<interface> intf = std::make_shared<interface>(
@@ -43,8 +44,8 @@ namespace oms {
         }
 
         int set_interface_state(const std::string &intf_name, bool up) {
-            string intf_name_ = extract_intf_name(intf_name);
-            if (intf_name.empty()) return err_invalid_arg;
+            std::string intf_name_;
+            if(extract_intf_name(intf_name,intf_name_)!=success) return err_invalid_arg;
 
             auto intf = interface::find(intf_name_);
             if (!intf) {
@@ -59,17 +60,17 @@ namespace oms {
         }
 
         int del_af_packet_intf(const std::string &host_intf) {
-            string intfname = extract_intf_name(host_intf);
-            if (intfname.empty()) return err_invalid_arg;
+            std::string intf_name;
+            if(extract_intf_name(host_intf,intf_name)!=success) return err_invalid_arg;
 
-            auto intf = interface::find(intfname);
+            auto intf = interface::find(intf_name);
             if (!intf) {
                 return err_not_found;
             }
-            OM::mark(host_intf);
-            OM::sweep(host_intf);
+            OM::mark(intf_name);
+            OM::sweep(intf_name);
             //todo how to handle failure?
-            intfdb::delete_intf_and_ip(intfname);
+            intfdb::delete_intf_and_ip(intf_name);
             return success;
         }
 
@@ -79,12 +80,13 @@ namespace oms {
                 return err_existing;
             }
             admin_state_t state = (up ? admin_state_t::UP : admin_state_t::DOWN);
+
             std::shared_ptr<interface> loopintf = std::make_shared<interface>(
                     loopname, interface::type_t::LOOPBACK, state);
             if (OM::write(loopname, *loopintf) != rc_t::OK) {
                 return err_failed;
             }
-            return err_existing;
+            return success;
         }
 
         int del_loopback_intf(const std::string &loopname) {
@@ -99,17 +101,17 @@ namespace oms {
             return success;
         }
 
-        int set_ip(const string &intf_name, const string &ip, const int prefix_len) {
+        int set_ip(const string &intf_name, const string &ip_str, const int prefix_len) {
             if (!VALID_IP_PREFIX_LEN(prefix_len)) return err_invalid_arg;
+            std::string intf_name_;
+            if(extract_intf_name(intf_name,intf_name_)!=success) return err_invalid_arg;
 
-            string intfname = extract_intf_name(intf_name);
-            if (intf_name.empty()) return err_invalid_arg;
 
-            std::shared_ptr<interface> i = interface::find(intf_name);
+            std::shared_ptr<interface> i = interface::find(intf_name_);
             if (!i) {
                 return rc::err_not_found;
             }
-            VOM::route::prefix_t addr(ip, prefix_len);
+            VOM::route::prefix_t addr(ip_str, prefix_len);
             std::shared_ptr<l3_binding> ip_binding =
                     std::make_shared<l3_binding>(*i, addr);
 
@@ -118,32 +120,29 @@ namespace oms {
 #undef KEY
                 return err_failed;
             }
-            string ip_with_prefix = ip + "/" + std::to_string(prefix_len);
+            ip ip_with_prefix=std::make_pair(ip_str, prefix_len);
 
             intfdb::put_ip_and_intf(ip_with_prefix, intf_name);
             return rc::success;
         }
 
         int set_ip(const std::string &intf, const string &ip_with_prefix) {
-            size_t pos = string::npos;
-            if ((pos = ip_with_prefix.find('/')) == string::npos) return err_invalid_arg;
-            string ip = ip_with_prefix.substr(pos);
-            int prefix_len = -1;
-            try {
-                prefix_len = std::stoi(ip_with_prefix.substr(pos + 1));
-            } catch (...) {
-
-            }
-            if (-1 == prefix_len) return err_invalid_arg;
+            string ip;
+            int prefix_len=-1;
+            if(split_ip_addr(ip_with_prefix,ip,prefix_len)!=success) return err_invalid_arg;
             return set_ip(intf, ip, prefix_len);
         }
 
-        int del_ip(const std::string &intf, const std::string &ip, const int prefix_len) {
-            string intfname = extract_intf_name(intf);
+        int del_ip(const std::string &intf, const std::string &ip_str, const int prefix_len) {
+            string intfname;
+
+            if(extract_intf_name(intf,intfname)!=success) return err_invalid_arg;
+            if(!valid_ip(ip_str)) return err_invalid_arg;
             if (!VALID_IP_PREFIX_LEN(prefix_len)) return err_invalid_arg;
+
             auto i = interface::find(intfname);
             if (!i) return err_not_found;
-            VOM::route::prefix_t addr(ip, prefix_len);
+            VOM::route::prefix_t addr(ip_str, prefix_len);
 
             std::shared_ptr<l3_binding> ip_binding =
                     std::make_shared<l3_binding>(*i, addr);
@@ -152,24 +151,37 @@ namespace oms {
             OM::mark(KEY(ip_binding));
             OM::sweep(KEY(ip_binding));
 #undef KEY
-            string ip_with_prefix=ip+"/"+std::to_string(prefix_len);
+            ip iip=std::make_pair(ip_str,prefix_len);
             //todo how to handle failure
-            intfdb::delete_ip(intfname,ip_with_prefix);
+            intfdb::delete_ip(intfname,iip);
             return success;
         }
 
         int del_ip(const std::string &intf, const string &ip_with_prefix) {
-            size_t pos = string::npos;
-            if ((pos = ip_with_prefix.find('/')) == string::npos) return err_invalid_arg;
-            string ip = ip_with_prefix.substr(pos);
-            int prefix_len = -1;
-            try {
-                prefix_len = std::stoi(ip_with_prefix.substr(pos + 1));
-            } catch (...) {
 
+            string ip_str;
+            int prefix_len=-1;
+            if(split_ip_addr(ip_with_prefix,ip_str,prefix_len)!=success){
+                return err_invalid_arg;
             }
-            if (-1 == prefix_len) return err_invalid_arg;
-            return del_ip(intf, ip, prefix_len);
+            return del_ip(intf, ip_str, prefix_len);
+        }
+
+        int del_intf(const std::string &intf_name){
+            string intfname;
+            if(extract_intf_name(intf_name,intfname)!=success){
+                return err_invalid_arg;
+            }
+            auto intf = interface::find(intfname);
+            if (!intf) {
+                return err_not_found;
+            }
+            OM::mark(intfname);
+            OM::sweep(intfname);
+            //todo how to handle failure?
+            intfdb::delete_intf_and_ip(intfname);
+            return success;
+
         }
 
     } // namespace intf

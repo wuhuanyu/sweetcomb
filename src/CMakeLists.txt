@@ -27,6 +27,7 @@ string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
 # add subdirectories
 add_subdirectory(plugins)
+#add_subdirectory(test)
 
 include(Packager)
 #make_packages()

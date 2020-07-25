@@ -12,3 +12,4 @@ build-root/*
 .pydevproject
 .vscode/
 cmake-build-debug
+*.out

@@ -73,7 +73,10 @@ set(PLUGINS_SOURCES
         ietf/ietf_routing.cpp
         openconfig/openconfig_interfaces.cpp
         ietf/ietf_nat.cpp
-        oms/intf.cpp oms/intf.hpp oms/routing.cpp oms/routing.hpp oms/common.hpp oms/common.cpp oms/db.cpp oms/db.hpp)
+        oms/intf.cpp
+        oms/routing.cpp
+        oms/common.cpp oms/db.cpp)
+
 
 set_source_files_properties(${PLUGINS_SOURCES} PROPERTIES LANGUAGE CXX)
 

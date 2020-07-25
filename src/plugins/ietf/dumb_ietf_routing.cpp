@@ -154,6 +154,6 @@ int dumb_static_routing_init(sc_plugin_main_t *pm) {
 void dumb_static_routing_exit(__attribute__ ((unused)) sc_plugin_main_t *pm) {
 }
 
-SC_INIT_FUNCTION (dumb_static_routing_init);
+//SC_INIT_FUNCTION (dumb_static_routing_init);
 
-SC_EXIT_FUNCTION (dumb_static_routing_exit);
+//SC_EXIT_FUNCTION (dumb_static_routing_exit);

@@ -1,12 +1,17 @@
 #include "intfutils.h"
+#include "../common.hpp"
 
-
-string extract_intf_name(string intf) {
-    if (intf.find("host-") == string::npos)
-        return intf;
-    //host-intf
-    if (intf.size() > 5) return intf.substr(5);
-    return "";
+using rc=sweetcomb::rc;
+int extract_intf_name(const string &intf,string &result) {
+    if (intf.find("host-") == string::npos){
+        result=intf;
+        return rc::success;
+    }
+    if (intf.size() > 5) {
+        result=intf.substr(5);
+        return rc::success;
+    }
+    return rc::err_invalid_arg;
 }
 
 

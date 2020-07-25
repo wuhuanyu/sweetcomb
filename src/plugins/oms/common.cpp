@@ -25,4 +25,28 @@ namespace oms {
         boost::asio::ip::make_address("10.0.1.0", er);
         return (!er);
     }
+    sr_error_e sr_error(int code){
+        sr_error_e rv;
+        switch (code) {
+            case err_failed:
+                rv=SR_ERR_OPERATION_FAILED;
+                break;
+            case err_not_found:
+                rv=SR_ERR_NOT_FOUND;
+                break;
+            case success:
+                rv=SR_ERR_OK;
+                break;
+            case err_invalid_arg:
+                rv=SR_ERR_INVAL_ARG;
+                break;
+            case err_existing:
+                rv=SR_ERR_DATA_EXISTS;
+                break;
+            default:
+                rv=SR_ERR_UNSUPPORTED;
+                break;
+        }
+        return rv;
+    }
 }

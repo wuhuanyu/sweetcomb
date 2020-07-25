@@ -16,6 +16,7 @@
 #include "utils/intfutils.h"
 #include "structures/interface.hpp"
 #include "parser.hpp"
+#include "oms/routing.hpp"
 
 // https://github.com/FDio/vpp/blob/master/src/tools/vppapigen/VPPAPI.md
 
@@ -110,29 +111,27 @@ static int ietf_static_routing_add_remove_cb(sr_session_ctx_t *session,
         sr_free_val(old_val);
         sr_free_val(new_val);
         if (del && !dst_addr.empty()) {
-            rv = cmd::del_static_route(dst_addr);
-            if (rv != 0) {
+            rv=-1;
+            if((rv=oms::routing::del_static_routing(dst_addr))!=oms::success){
+                rc=oms::sr_err(rv);
                 SRP_LOG_ERR("Error when deleting routing dst_addr:'%s'", dst_addr.c_str());
-                rc = SR_ERR_OPERATION_FAILED;
                 goto nothing_todo;
-            } else {
-                SRP_LOG_DBG("Deleting routing dst_addr: '%s' successfully", dst_addr.c_str());
             }
-
+            SRP_LOG_DBG("Deleting routing dst_addr: '%s' successfully", dst_addr.c_str());
         }
         if (create && !dst_addr.empty() && !next_hop.empty()) {
             // todo configure static routing
             SRP_LOG_DBG ("starting to configure dst addr '%s' nexthop_addr:%s",
                          dst_addr.c_str(), next_hop.c_str());
-            rv = cmd::add_static_route(dst_addr, next_hop);
-            if (rv != 0) {
-                SRP_LOG_DBG_MSG("configure static routing err_failed");
-                rc = SR_ERR_OPERATION_FAILED;
+            if((rv=oms::routing::create_static_routing(dst_addr,next_hop))!=oms::success){
+                SRP_LOG_ERR("Error configure static routing dst addr %s,next hop %s",dst_addr.c_str(),next_hop.c_str());
+                rc = oms::sr_err(rv);
                 goto nothing_todo;
-            } else {
-                SRP_LOG_DBG("Configure static routing for dst_addr:'%s' successfully",
-                            dst_addr.c_str());
             }
+            rc=oms::sr_err(rv);
+            SRP_LOG_DBG("Configure static routing for dst_addr:'%s',next hop %s successfully",
+                       dst_addr.c_str(),next_hop.c_str());
+
         }
     }
 
@@ -167,5 +166,5 @@ void ietf_static_routing_exit(__attribute__((unused)) sc_plugin_main_t *pm) {
 
 }
 
-// SC_INIT_FUNCTION(ietf_static_routing_init);
-// SC_EXIT_FUNCTION(ietf_static_routing_exit);
+ SC_INIT_FUNCTION(ietf_static_routing_init);
+ SC_EXIT_FUNCTION(ietf_static_routing_exit);
