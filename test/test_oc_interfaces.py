@@ -17,13 +17,11 @@
 #
 
 import unittest
-
-import util
 from framework import SweetcombTestCase, SweetcombTestRunner
-from ydk.models.openconfig import openconfig_interfaces
-from ydk.models.ietf import iana_if_type
-from ydk.services import CRUDService
 from ydk.errors import YError
+from ydk.models.ietf import iana_if_type
+from ydk.models.openconfig import openconfig_interfaces
+from ydk.services import CRUDService
 
 
 class TestOcInterfaces(SweetcombTestCase):
@@ -98,11 +96,12 @@ class TestOcInterfaces(SweetcombTestCase):
             crud_service.create(self.netopeer_cli, interface)
         except YError as err:
             print("Error create services: {}".format(err))
-            assert()
+            assert ()
 
         a = self.vppctl.show_address(name)
 
         self.logger.info("OC_INTERFACE_FINISH_002")
+
 
 if __name__ == '__main__':
     unittest.main(testRunner=SweetcombTestRunner)

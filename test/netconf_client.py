@@ -19,11 +19,12 @@ from ydk.providers import NetconfServiceProvider
 
 class NetConfClient(NetconfServiceProvider):
     def __init__(self, address, username, password=None, port=830, protocol="ssh",
-                       on_demand=True, common_cache=False, timeout=None, repo=None, private_key_path=None, public_key_path=None):
+                 on_demand=True, common_cache=False, timeout=None, repo=None, private_key_path=None,
+                 public_key_path=None):
         super(NetConfClient, self).__init__(address, username, password, port,
-                                        protocol, on_demand, common_cache,
-                                        timeout, repo, private_key_path,
-                                        public_key_path)
+                                            protocol, on_demand, common_cache,
+                                            timeout, repo, private_key_path,
+                                            public_key_path)
 
     def terminate(self):
         pass

@@ -15,12 +15,11 @@
 # limitations under the License.
 #
 
-import unittest
-
-from topology import Topology
-import vppctl
-import sys
 import log
+import sys
+import unittest
+import vppctl
+from topology import Topology
 
 
 class SweetcombTestCase(unittest.TestCase):
@@ -33,7 +32,6 @@ class SweetcombTestCase(unittest.TestCase):
 
     @classmethod
     def create_topology(cls, debug=False):
-
         cls.topology = Topology()
         cls.topology.create_topology(debug)
 
@@ -43,7 +41,6 @@ class SweetcombTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-
         super(SweetcombTestCase, cls).setUpClass()
         cls.logger = log.get_logger(cls.__name__)
 
@@ -85,9 +82,9 @@ class SweetcombTestRunner(unittest.TextTestRunner):
         # ignore stream setting here, use hard-coded stdout to be in sync
         # with prints from VppTestCase methods ...
         super(SweetcombTestRunner, self).__init__(sys.stdout, descriptions,
-                                            verbosity, failfast, buffer,
-                                            resultclass, **kwargs)
-        #KeepAliveReporter.pipe = keep_alive_pipe
+                                                  verbosity, failfast, buffer,
+                                                  resultclass, **kwargs)
+        # KeepAliveReporter.pipe = keep_alive_pipe
 
         self.orig_stream = self.stream
         self.resultclass.test_framework_result_pipe = result_pipe
@@ -113,5 +110,3 @@ class SweetcombTestRunner(unittest.TextTestRunner):
             self.stream = self.orig_stream
             result.stream = self.orig_stream
         return result
-
-

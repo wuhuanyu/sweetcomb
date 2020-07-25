@@ -1,14 +1,14 @@
 {
-    "aliases": {
-        "interface_index": {
-            "type": "u32"
-        }
-    },
-    "enums": [],
-    "options": {},
-    "vl_api_version": "0xfa73ea25",
-    "unions": [],
-    "types": [],
-    "messages": [],
-    "services": {}
+  "aliases": {
+    "interface_index": {
+      "type": "u32"
+    }
+  },
+  "enums": [],
+  "options": {},
+  "vl_api_version": "0xfa73ea25",
+  "unions": [],
+  "types": [],
+  "messages": [],
+  "services": {}
 }

@@ -21,8 +21,9 @@
 struct sc_plugin_main_t;
 
 /* Init/exit functions: called at start/end of sr plugin init/cleaup. */
-typedef int (sc_init_function_t) (struct sc_plugin_main_t *pm);
-typedef void (sc_exit_function_t) (struct sc_plugin_main_t *pm);
+typedef int (sc_init_function_t)(struct sc_plugin_main_t *pm);
+
+typedef void (sc_exit_function_t)(struct sc_plugin_main_t *pm);
 
 /* Declaration of init/exit Linked List structures */
 #define foreach_sc_declare_function_list    \

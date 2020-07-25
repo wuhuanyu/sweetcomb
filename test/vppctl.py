@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-import subprocess
 import re
+import subprocess
 
 
 class VppInterface:

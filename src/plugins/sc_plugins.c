@@ -35,8 +35,7 @@ using namespace VOM;
 #define CMDLINE_MAX _DIRENT_NAME + 15
 #define VPP_FULL_PATH "/usr/bin/vpp"
 
-sc_plugin_main_t *sc_get_plugin_main()
-{
+sc_plugin_main_t *sc_get_plugin_main() {
     return &sc_plugin_main;
 }
 
@@ -44,13 +43,12 @@ sc_plugin_main_t *sc_get_plugin_main()
  * @brief get one pid of any running vpp process.
  * @return Return vpp pid or -ESRH value if process was not found
  */
-int get_vpp_pid()
-{
+int get_vpp_pid() {
     DIR *dir = NULL;
     struct dirent *ptr = NULL;
     FILE *fp = NULL;
     char filepath[CMDLINE_MAX];
-    char filetext[sizeof(VPP_FULL_PATH)+1];
+    char filetext[sizeof(VPP_FULL_PATH) + 1];
     char *first = NULL;
     size_t cnt;
 
@@ -59,8 +57,7 @@ int get_vpp_pid()
         return -errno;
 
     /* read vpp pid file in proc, return pid of vpp */
-    while (NULL != (ptr = readdir(dir)))
-    {
+    while (NULL != (ptr = readdir(dir))) {
         if ((0 == strcmp(ptr->d_name, ".")) || (0 == strcmp(ptr->d_name, "..")))
             continue;
 
@@ -114,8 +111,7 @@ int get_vpp_pid()
 }
 
 
-int sr_plugin_init_cb(sr_session_ctx_t *session, void **private_ctx)
-{
+int sr_plugin_init_cb(sr_session_ctx_t *session, void **private_ctx) {
     int rc = SR_ERR_OK;;
 
     sc_plugin_main.session = session;
@@ -123,7 +119,7 @@ int sr_plugin_init_cb(sr_session_ctx_t *session, void **private_ctx)
     /* Connection to VAPI via VOM and VOM database */
     HW::init();
     OM::init();
-    while (HW::connect() != true){
+    while (HW::connect() != true) {
         //sleep for 200 milliseconds
         usleep(200000);
     }
@@ -153,22 +149,21 @@ int sr_plugin_init_cb(sr_session_ctx_t *session, void **private_ctx)
     return SR_ERR_OK;
 }
 
-void sr_plugin_cleanup_cb(sr_session_ctx_t *session, void *private_ctx)
-{
+void sr_plugin_cleanup_cb(sr_session_ctx_t *session, void *private_ctx) {
     sc_call_all_exit_function(&sc_plugin_main);
 
     /* subscription was set as our private context */
     if (private_ctx != NULL)
-        sr_unsubscribe(session, (sr_subscription_ctx_t*) private_ctx);
+        sr_unsubscribe(session, (sr_subscription_ctx_t *) private_ctx);
     SRP_LOG_DBG_MSG("unload plugin ok.");
 
     HW::disconnect();
     SRP_LOG_DBG_MSG("plugin disconnect vpp ok.");
 }
 
-int sr_plugin_health_check_cb(sr_session_ctx_t *session, void *private_ctx)
-{
-    UNUSED(session); UNUSED(private_ctx);
+int sr_plugin_health_check_cb(sr_session_ctx_t *session, void *private_ctx) {
+    UNUSED(session);
+    UNUSED(private_ctx);
     int vpp_pid_now = get_vpp_pid();
 
     if (vpp_pid_now == vpp_pid_start)

@@ -1,8 +1,8 @@
 <interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
     <interface>
-        <name>host</name>
         <description>host</description>
-        <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
         <enabled>true</enabled>
+        <name>host</name>
+        <type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
     </interface>
 </interfaces>

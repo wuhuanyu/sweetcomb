@@ -17,9 +17,9 @@
 #define __SC_PLUGINS_H__
 
 extern "C" {
-    #include <sysrepo.h>
-    #include <sysrepo/values.h>
-    #include <sysrepo/plugins.h>
+#include <sysrepo.h>
+#include <sysrepo/values.h>
+#include <sysrepo/plugins.h>
 }
 
 #include "sc_init.h"

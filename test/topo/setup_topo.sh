@@ -74,12 +74,12 @@ $vppctl1 create host-interface name vpp1vpp2
 $vppctl1 set int state host-vpp1vpp2 up 
 $vppctl1 set int ip address host-vpp1vpp2 10.0.2.1/24
 #to be configured by sweetcomb
-$vppctl1 ip route add 10.0.3.0/24 via 10.0.2.2
+$vppctl1 ip route add 10.0.3.0/24 via 10.0.2.1
 
 $vppctl2 create host-interface name vpp2vpp1
 $vppctl2 set int state host-vpp2vpp1 up
 $vppctl2 set int ip address host-vpp2vpp1 10.0.2.2/24
-$vppctl2 ip route add 10.0.1.0/24 via 10.0.2.1
+$vppctl2 ip route add 10.0.1.0/24 via 10.0.2.2
 
 
 

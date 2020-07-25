@@ -57,9 +57,11 @@ using VOM::rc_t;
 /* Just to intercept request trying to create nat instances */
 static int
 nat_instance_config_cb(sr_session_ctx_t *ds, const char *xpath,
-                       sr_notif_event_t event, void *private_ctx)
-{
-    UNUSED(ds); UNUSED(xpath); UNUSED(event); UNUSED(private_ctx);
+                       sr_notif_event_t event, void *private_ctx) {
+    UNUSED(ds);
+    UNUSED(xpath);
+    UNUSED(event);
+    UNUSED(private_ctx);
 
     SRP_LOG_INF("In %s", __FUNCTION__);
 
@@ -91,10 +93,10 @@ public:
         if (m_type != "static") //only static is supported for now
             return nullptr;
 
-        if (! m_internal_src.empty() && ! m_external_src.empty() ) {
+        if (!m_internal_src.empty() && !m_external_src.empty()) {
             m_inside = m_internal_src.address();
             m_outside = m_external_src.address();
-        } else if (! m_internal_dest.empty() && ! m_external_dest.empty() ) {
+        } else if (!m_internal_dest.empty() && !m_external_dest.empty()) {
             m_inside = m_internal_dest.address();
             m_outside = m_external_dest.address();
         } else
@@ -104,34 +106,32 @@ public:
     }
 
     /* Getters */
-    boost::asio::ip::address inside ()
-    { return m_inside; }
-    boost::asio::ip::address outside()
-    { return m_outside; }
+    boost::asio::ip::address inside() { return m_inside; }
+
+    boost::asio::ip::address outside() { return m_outside; }
 
     /* Setters */
-    nat_static_builder& set_type(std::string t)
-    {
+    nat_static_builder &set_type(std::string t) {
         m_type = t;
         return *this;
     }
-    nat_static_builder& set_internal_src(std::string p)
-    {
+
+    nat_static_builder &set_internal_src(std::string p) {
         m_internal_src = utils::prefix::make_prefix(p);
         return *this;
     }
-    nat_static_builder& set_external_src(std::string p)
-    {
+
+    nat_static_builder &set_external_src(std::string p) {
         m_external_src = utils::prefix::make_prefix(p);
         return *this;
     }
-    nat_static_builder& set_internal_dest(std::string p)
-    {
+
+    nat_static_builder &set_internal_dest(std::string p) {
         m_internal_dest = utils::prefix::make_prefix(p);
         return *this;
     }
-    nat_static_builder& set_external_dest(std::string p)
-    {
+
+    nat_static_builder &set_external_dest(std::string p) {
         m_external_dest = utils::prefix::make_prefix(p);
         return *this;
     }
@@ -151,8 +151,7 @@ private:
  */
 static int
 nat_mapping_table_config_cb(sr_session_ctx_t *ds, const char *xpath,
-                            sr_notif_event_t event, void *private_ctx)
-{
+                            sr_notif_event_t event, void *private_ctx) {
     UNUSED(private_ctx);
     nat_static_builder builder;
     std::shared_ptr<VOM::nat_static> ns = nullptr;
@@ -171,46 +170,46 @@ nat_mapping_table_config_cb(sr_session_ctx_t *ds, const char *xpath,
 
     SRP_LOG_INF("In %s", __FUNCTION__);
 
-    rc = sr_get_changes_iter(ds, (char *)xpath, &it);
+    rc = sr_get_changes_iter(ds, (char *) xpath, &it);
     if (rc != SR_ERR_OK)
         goto error;
 
     foreach_change(ds, it, oper, ol, ne) {
 
         switch (oper) {
-        case SR_OP_CREATED:
-            if (sr_xpath_node_name_eq(ne->xpath, "index")) {
-                xindex = ne->data.uint32_val;
-                create = true;
-            } else if (sr_xpath_node_name_eq(ne->xpath, "type")) {
-                /* For configuration only "static" can be supported */
-                builder.set_type(string(ne->data.string_val));
-            } else if (sr_xpath_node_name_eq(ne->xpath, "internal-src-address")) {
-                /* source IP on NAT internal network src address */
-                builder.set_internal_src(string(ne->data.string_val));
-            } else if (sr_xpath_node_name_eq(ne->xpath, "external-src-address")) {
-                /* source IP on NAT external network src address */
-                builder.set_external_src(string(ne->data.string_val));
-            } else if (sr_xpath_node_name_eq(ne->xpath, "internal-dst-address")) {
-                /* destination IP on NAT internal network src address */
-                builder.set_internal_dest(string(ne->data.string_val));
-            } else if (sr_xpath_node_name_eq(ne->xpath, "external-dst-address")) {
-                /* destination IP on NAT internal network src address */
-                builder.set_external_dest(string(ne->data.string_val));
-            }
-            break;
+            case SR_OP_CREATED:
+                if (sr_xpath_node_name_eq(ne->xpath, "index")) {
+                    xindex = ne->data.uint32_val;
+                    create = true;
+                } else if (sr_xpath_node_name_eq(ne->xpath, "type")) {
+                    /* For configuration only "static" can be supported */
+                    builder.set_type(string(ne->data.string_val));
+                } else if (sr_xpath_node_name_eq(ne->xpath, "internal-src-address")) {
+                    /* source IP on NAT internal network src address */
+                    builder.set_internal_src(string(ne->data.string_val));
+                } else if (sr_xpath_node_name_eq(ne->xpath, "external-src-address")) {
+                    /* source IP on NAT external network src address */
+                    builder.set_external_src(string(ne->data.string_val));
+                } else if (sr_xpath_node_name_eq(ne->xpath, "internal-dst-address")) {
+                    /* destination IP on NAT internal network src address */
+                    builder.set_internal_dest(string(ne->data.string_val));
+                } else if (sr_xpath_node_name_eq(ne->xpath, "external-dst-address")) {
+                    /* destination IP on NAT internal network src address */
+                    builder.set_external_dest(string(ne->data.string_val));
+                }
+                break;
 
-        case SR_OP_DELETED:
-            if (sr_xpath_node_name_eq(ol->xpath, "index")) {
-                xindex = ol->data.uint32_val;
-                remove = true;
-            }
-            break;
+            case SR_OP_DELETED:
+                if (sr_xpath_node_name_eq(ol->xpath, "index")) {
+                    xindex = ol->data.uint32_val;
+                    remove = true;
+                }
+                break;
 
-        default:
-            SRP_LOG_WRN_MSG("Operation not supported");
-            rc = SR_ERR_UNSUPPORTED;
-            goto error;
+            default:
+                SRP_LOG_WRN_MSG("Operation not supported");
+                rc = SR_ERR_UNSUPPORTED;
+                goto error;
         }
 
         sr_free_val(ne);
@@ -231,25 +230,25 @@ nat_mapping_table_config_cb(sr_session_ctx_t *ds, const char *xpath,
     }
 
     if (create) {
-        #define KEY(xindex) to_string(xindex)
+#define KEY(xindex) to_string(xindex)
         if (OM::write(KEY(xindex), *ns) != rc_t::OK) {
             SRP_LOG_ERR("Fail writing changes for nat: %s",
                         ns->to_string().c_str());
             rc = SR_ERR_OPERATION_FAILED;
             goto error;
         }
-        static_mapping_table[xindex] =  nat_pair_t(builder.inside(),
-                                                   builder.outside());
+        static_mapping_table[xindex] = nat_pair_t(builder.inside(),
+                                                  builder.outside());
         SRP_LOG_INF_MSG("Sucess creating nat static entry");
     } else if (remove) {
         OM::remove(KEY(xindex));
         static_mapping_table.erase(xindex);
-        #undef KEY
+#undef KEY
     }
 
     return SR_ERR_OK;
 
-error:
+    error:
     sr_free_val(ol);
     sr_free_val(ne);
     sr_free_change_iter(it);
@@ -262,9 +261,10 @@ error:
 static int
 nat_cap_state_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
                  uint64_t request_id, const char *original_xpath,
-                 void *private_ctx)
-{
-    UNUSED(request_id); UNUSED(original_xpath); UNUSED(private_ctx);
+                 void *private_ctx) {
+    UNUSED(request_id);
+    UNUSED(original_xpath);
+    UNUSED(private_ctx);
     sr_val_t *val = nullptr;
     int vc = 1; //expected number of answer
     int cnt = 0; //value counter
@@ -288,7 +288,7 @@ nat_cap_state_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
 
     return SR_ERR_OK;
 
-nothing_todo:
+    nothing_todo:
     *values = NULL;
     *values_cnt = 0;
     return rc;
@@ -296,19 +296,21 @@ nothing_todo:
 
 
 int
-ietf_nat_init(sc_plugin_main_t *pm)
-{
+ietf_nat_init(sc_plugin_main_t *pm) {
     int rc = SR_ERR_OK;
     SRP_LOG_DBG_MSG("Initializing ietf-nat plugin.");
 
     rc = sr_subtree_change_subscribe(pm->session, "/ietf-nat:nat/instances/instance",
-            nat_instance_config_cb, NULL, 1, SR_SUBSCR_CTX_REUSE, &pm->subscription);
+                                     nat_instance_config_cb, NULL, 1, SR_SUBSCR_CTX_REUSE,
+                                     &pm->subscription);
     if (rc != SR_ERR_OK) {
         goto error;
     }
 
-    rc = sr_subtree_change_subscribe(pm->session, "/ietf-nat:nat/instances/instance/mapping-table/mapping-entry",
-            nat_mapping_table_config_cb, NULL, 10, SR_SUBSCR_CTX_REUSE, &pm->subscription);
+    rc = sr_subtree_change_subscribe(pm->session,
+                                     "/ietf-nat:nat/instances/instance/mapping-table/mapping-entry",
+                                     nat_mapping_table_config_cb, NULL, 10, SR_SUBSCR_CTX_REUSE,
+                                     &pm->subscription);
     if (rc != SR_ERR_OK) {
         goto error;
     }
@@ -322,15 +324,15 @@ ietf_nat_init(sc_plugin_main_t *pm)
     SRP_LOG_DBG_MSG("ietf-nat plugin initialized successfully.");
     return SR_ERR_OK;
 
-error:
+    error:
     SRP_LOG_ERR("Error by initialization of ietf-nat plugin. Error : %d", rc);
     return rc;
 }
 
 void
-ietf_nat_exit(__attribute__((unused)) sc_plugin_main_t *pm)
-{
+ietf_nat_exit(__attribute__((unused)) sc_plugin_main_t *pm) {
 }
 
 SC_INIT_FUNCTION(ietf_nat_init);
+
 SC_EXIT_FUNCTION(ietf_nat_exit);

@@ -16,8 +16,7 @@
 #include "sc_plugins.h"
 
 int
-sc_call_all_init_function(sc_plugin_main_t *pm)
-{
+sc_call_all_init_function(sc_plugin_main_t *pm) {
     int ret = SR_ERR_OK;
     _sc_init_function_list_elt_t *p = pm->init_function_registrations;
     while (p != NULL) {
@@ -34,8 +33,7 @@ sc_call_all_init_function(sc_plugin_main_t *pm)
 }
 
 void
-sc_call_all_exit_function(sc_plugin_main_t *pm)
-{
+sc_call_all_exit_function(sc_plugin_main_t *pm) {
     _sc_exit_function_list_elt_t *p = pm->exit_function_registrations;
     while (p != NULL) {
         if (!p->is_called) {

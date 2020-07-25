@@ -17,16 +17,12 @@
 #
 #
 
-import unittest
-import util
 import argparse
-import os
 import importlib
+import os
 import sys
-import fnmatch
-
-
-from framework import SweetcombTestCase, SweetcombTestRunner
+import unittest
+from framework import SweetcombTestRunner
 
 
 class SplitToSuitesCallback:
@@ -101,16 +97,15 @@ if __name__ == '__main__':
         suites.append(testcase_suite)
 
     full_suite = unittest.TestSuite()
-    #map(full_suite.addTests, suites)
+    # map(full_suite.addTests, suites)
     for suite in suites:
         full_suite.addTests(suite)
     result = SweetcombTestRunner(verbosity=1,
                                  print_summary=True).run(full_suite)
     was_successful = result.wasSuccessful()
-    #if not was_successful:
-        #for test_case_info in result.failed_test_cases_info:
-            #handle_failed_suite(test_case_info.logger,
-                                #test_case_info.tempdir,
-                                    #test_case_info.vpp_pid)
+    # if not was_successful:
+    # for test_case_info in result.failed_test_cases_info:
+    # handle_failed_suite(test_case_info.logger,
+    # test_case_info.tempdir,
+    # test_case_info.vpp_pid)
     sys.exit(not was_successful)
-

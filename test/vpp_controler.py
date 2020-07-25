@@ -15,10 +15,10 @@
 # limitations under the License.
 #
 
+import os
+import psutil
 import subprocess
 import time
-import psutil
-import os
 
 
 class Vpp_controler:

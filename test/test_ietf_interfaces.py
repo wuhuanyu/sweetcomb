@@ -17,13 +17,11 @@
 #
 
 import unittest
-
-import util
 from framework import SweetcombTestCase, SweetcombTestRunner
-from ydk.models.ietf import ietf_interfaces
-from ydk.models.ietf import iana_if_type
-from ydk.services import CRUDService
 from ydk.errors import YError
+from ydk.models.ietf import iana_if_type
+from ydk.models.ietf import ietf_interfaces
+from ydk.services import CRUDService
 
 
 class TestIetfInterfaces(SweetcombTestCase):
@@ -56,14 +54,14 @@ class TestIetfInterfaces(SweetcombTestCase):
             crud_service.create(self.netopeer_cli, interface)
         except YError as err:
             print("Error create services: {}".format(err))
-            assert()
+            assert ()
 
         p = self.vppctl.show_interface(name)
         self.assertIsNotNone(p)
 
         self.assertEquals(interface.enabled, p.State)
-        #FIXME: MTU assert
-        #self.assertEquals(interface.ipv4.mtu, p.MTU)
+        # FIXME: MTU assert
+        # self.assertEquals(interface.ipv4.mtu, p.MTU)
 
         interface.enabled = False
 
@@ -71,7 +69,7 @@ class TestIetfInterfaces(SweetcombTestCase):
             crud_service.create(self.netopeer_cli, interface)
         except YError as err:
             print("Error create services: {}".format(err))
-            assert()
+            assert ()
 
         p = self.vppctl.show_interface(name)
         self.assertIsNotNone(p)
@@ -103,24 +101,24 @@ class TestIetfInterfaces(SweetcombTestCase):
             crud_service.create(self.netopeer_cli, interface)
         except YError as err:
             print("Error create services: {}".format(err))
-            assert()
+            assert ()
 
         a = self.vppctl.show_address(name)
         self.assertIsNotNone(a)
 
         prefix = interface.ipv4.address[0].ip + "/" + \
-                                str(interface.ipv4.address[0].prefix_length)
+                 str(interface.ipv4.address[0].prefix_length)
         self.assertIn(prefix, a.addr)
 
         prefix = interface.ipv4.address[1].ip + "/" + \
-                                str(interface.ipv4.address[1].prefix_length)
+                 str(interface.ipv4.address[1].prefix_length)
         self.assertIn(prefix, a.addr)
 
         try:
             crud_service.delete(self.netopeer_cli, interface)
         except YError as err:
             print("Error create services: {}".format(err))
-            assert()
+            assert ()
 
         a = self.vppctl.show_address(name)
 

@@ -20,9 +20,9 @@
 
 //TODO: Add to only one header file
 extern "C" {
-    #include <sysrepo.h>
-    #include <sysrepo/xpath.h>
-    #include <sysrepo/plugins.h>
+#include <sysrepo.h>
+#include <sysrepo/xpath.h>
+#include <sysrepo/plugins.h>
 }
 
 #include <iostream>
@@ -77,68 +77,67 @@ namespace utils {
 /* Convert netmask to prefix length.
  * 255.255.255.0->24
  */
-inline uint8_t netmask_to_plen(boost::asio::ip::address netmask)
-{
-    in_addr_t n = 0;
-    uint8_t i = 0;
-    int af;
-    int rc;
+    inline uint8_t netmask_to_plen(boost::asio::ip::address netmask) {
+        in_addr_t n = 0;
+        uint8_t i = 0;
+        int af;
+        int rc;
 
-    if (netmask.is_v4())
-        af = AF_INET;
-    else if (netmask.is_v6())
-        af = AF_INET6;
-    else
-        throw std::runtime_error("Invalid address family");
+        if (netmask.is_v4())
+            af = AF_INET;
+        else if (netmask.is_v6())
+            af = AF_INET6;
+        else
+            throw std::runtime_error("Invalid address family");
 
-    /* Convert address to binary form */
-    rc = inet_pton(af, netmask.to_string().c_str(), &n);
-    if (rc <= 0)
-        throw std::runtime_error("Fail converting netmask to prefix length");
+        /* Convert address to binary form */
+        rc = inet_pton(af, netmask.to_string().c_str(), &n);
+        if (rc <= 0)
+            throw std::runtime_error("Fail converting netmask to prefix length");
 
-    while (n > 0) {
-        n = n >> 1;
-        i++;
+        while (n > 0) {
+            n = n >> 1;
+            i++;
+        }
+
+        return i;
     }
 
-    return i;
-}
+    class prefix {
+    public:
+        /* Default Constructor */
+        prefix();
 
-class prefix {
-public:
-     /* Default Constructor */
-    prefix();
+        /* Copy constructor */
+        prefix(const prefix &p);
 
-    /* Copy constructor */
-    prefix(const prefix &p);
+        /* Constuctor from string prefix */
+        prefix(std::string p);
 
-    /* Constuctor from string prefix */
-    prefix(std::string p);
+        /* Create a prefix from a string */
+        static prefix make_prefix(std::string p);
 
-    /* Create a prefix from a string */
-    static prefix make_prefix(std::string p);
+        /* Return prefix "AAA.BBB.CCC.DDD/ZZ"
+         * "YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY/ZZZ */
+        std::string to_string() const;
 
-    /* Return prefix "AAA.BBB.CCC.DDD/ZZ"
-     * "YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY/ZZZ */
-    std::string to_string() const;
+        /* Extract prefix length "ZZ"/"ZZZ" an IP prefix: "AAA.BBB.CCC.DDD/ZZ"
+         * "YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY/ZZZ */
+        unsigned short prefix_length() const;
 
-    /* Extract prefix length "ZZ"/"ZZZ" an IP prefix: "AAA.BBB.CCC.DDD/ZZ"
-     * "YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY/ZZZ */
-    unsigned short prefix_length() const;
+        /* Extract IP "AAA.BBB.CCC.DDD" from an IP prefix: "AAA.BBB.CCC.DDD/ZZ"
+         * "YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY/ZZZ */
+        boost::asio::ip::address address() const;
 
-    /* Extract IP "AAA.BBB.CCC.DDD" from an IP prefix: "AAA.BBB.CCC.DDD/ZZ"
-     * "YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY:YYYY/ZZZ */
-    boost::asio::ip::address address() const;
+        /* Return true if prefix is empty */
+        bool empty() const;
 
-    /* Return true if prefix is empty */
-    bool empty() const;
+        friend ostream &operator<<(ostream &os, const prefix &p);
 
-    friend ostream& operator<<(ostream& os, const prefix& p);
-
-private:
-    boost::asio::ip::address m_address;
-    unsigned short m_prefix_len;
-};
+    private:
+        boost::asio::ip::address m_address;
+        unsigned short m_prefix_len;
+    };
 
 } //end of utils namespace
 

@@ -20,13 +20,13 @@ project(sweetcomb)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # set default build type if not specified by user
-if(NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE debug)
-endif()
+endif ()
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
 # add subdirectories
 add_subdirectory(plugins)
 
 include(Packager)
-make_packages()
+#make_packages()

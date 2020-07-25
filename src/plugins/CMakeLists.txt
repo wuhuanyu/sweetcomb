@@ -33,11 +33,11 @@ if (NOT SR_PLUGINS_DIR)
     if (PKG_CONFIG_FOUND)
         execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} "--variable=SR_PLUGINS_DIR" "libsysrepo" OUTPUT_VARIABLE SR_PLUGINS_DIR)
         string(STRIP ${SR_PLUGINS_DIR} SR_PLUGINS_DIR)
-    endif()
-endif()
+    endif ()
+endif ()
 if (NOT SR_PLUGINS_DIR)
     message(FATAL_ERROR "Cannot get sysrepo plugins directory due to missing pkg-config, set SR_PLUGINS_DIR manually.")
-endif()
+endif ()
 
 # COMPILER & LINKER
 ###################
@@ -57,30 +57,30 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # plugins sources
 set(PLUGINS_SOURCES
-    sc_init.c
-    sc_plugins.c
-    sys_util.cpp
-    utils/utils.cpp
-    vpp-oper/interface.cpp
-    structures/interface.cpp
-    cmds/intfcmd.cpp
-    cmds/routecmd.cpp
-    utils/intfutils.cpp
-    ietf/parser.cpp
-    ietf/dumb_ietf_cbs.cpp
-    ietf/dumb_ietf_routing.cpp
-    ietf/ietf_interface.cpp
-    ietf/ietf_routing.cpp
-    openconfig/openconfig_interfaces.cpp
-    ietf/ietf_nat.cpp
-)
+        sc_init.c
+        sc_plugins.c
+        sys_util.cpp
+        utils/utils.cpp
+        vpp-oper/interface.cpp
+        structures/interface.cpp
+        cmds/intfcmd.cpp
+        cmds/routecmd.cpp
+        utils/intfutils.cpp
+        ietf/parser.cpp
+        ietf/dumb_ietf_cbs.cpp
+        ietf/dumb_ietf_routing.cpp
+        ietf/ietf_interface.cpp
+        ietf/ietf_routing.cpp
+        openconfig/openconfig_interfaces.cpp
+        ietf/ietf_nat.cpp
+        oms/intf.cpp oms/intf.hpp oms/routing.cpp oms/routing.hpp oms/common.hpp oms/common.cpp oms/db.cpp oms/db.hpp)
 
 set_source_files_properties(${PLUGINS_SOURCES} PROPERTIES LANGUAGE CXX)
 
 # build the source code into shared library
 add_library(sweetcomb SHARED ${PLUGINS_SOURCES})
 target_link_libraries(sweetcomb ${SYSREPO_LIBRARIES} ${Boost_LIBRARIES}
-                                  ${VOM_LIBRARY})
+        ${VOM_LIBRARY})
 
 # INSTALL
 #########

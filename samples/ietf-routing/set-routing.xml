@@ -1,7 +1,6 @@
 <routing xmlns="urn:ietf:params:xml:ns:yang:ietf-routing">
     <control-plane-protocols>
         <control-plane-protocol>
-            <type>static</type>
             <name>default</name>
             <static-routes>
                 <ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ipv4-unicast-routing">
@@ -9,10 +8,11 @@
                         <destination-prefix>10.0.3.0/24</destination-prefix>
                         <next-hop>
                             <next-hop-address>10.0.2.2</next-hop-address>
-                        </next-hop>                        
+                        </next-hop>
                     </route>
                 </ipv4>
             </static-routes>
+            <type>static</type>
         </control-plane-protocol>
     </control-plane-protocols>
 </routing>

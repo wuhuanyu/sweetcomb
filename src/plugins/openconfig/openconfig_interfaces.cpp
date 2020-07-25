@@ -33,56 +33,55 @@ using type_t = VOM::interface::type_t;
 using admin_state_t = VOM::interface::admin_state_t;
 
 class interface_builder {
-    public:
-        interface_builder() {}
+public:
+    interface_builder() {}
 
-        shared_ptr<VOM::interface> build() {
-            if (m_name.empty() || m_type.empty())
-                return nullptr;
-            return make_shared<interface>(m_name, type_t::from_string(m_type),
-                                          admin_state_t::from_int(m_state));
-        }
+    shared_ptr<VOM::interface> build() {
+        if (m_name.empty() || m_type.empty())
+            return nullptr;
+        return make_shared<interface>(m_name, type_t::from_string(m_type),
+                                      admin_state_t::from_int(m_state));
+    }
 
-        /* Getters */
-        string name() {
-            return m_name;
-        }
+    /* Getters */
+    string name() {
+        return m_name;
+    }
 
-        /* Setters */
-        interface_builder& set_name(string n) {
-            m_name = n;
-            return *this;
-        }
+    /* Setters */
+    interface_builder &set_name(string n) {
+        m_name = n;
+        return *this;
+    }
 
-        interface_builder& set_type(string t) {
-            if (t == "iana-if-type:ethernetCsmacd")
-                m_type = "ETHERNET";
-            return *this;
-        }
+    interface_builder &set_type(string t) {
+        if (t == "iana-if-type:ethernetCsmacd")
+            m_type = "ETHERNET";
+        return *this;
+    }
 
-        interface_builder& set_state(bool enable) {
-            m_state = enable;
-            return *this;
-        }
+    interface_builder &set_state(bool enable) {
+        m_state = enable;
+        return *this;
+    }
 
-        std::string to_string() {
-            std::ostringstream os;
-            os << m_name << "," << m_type << "," << m_state;
-            return os.str();
-        }
+    std::string to_string() {
+        std::ostringstream os;
+        os << m_name << "," << m_type << "," << m_state;
+        return os.str();
+    }
 
-    private:
-        string m_name;
-        string m_type;
-        bool m_state;
+private:
+    string m_name;
+    string m_type;
+    bool m_state;
 };
 
 
 // XPATH: /openconfig-interfaces:interfaces/interface[name='%s']/config/
 static int
 oc_interfaces_config_cb(sr_session_ctx_t *ds, const char *xpath,
-                        sr_notif_event_t event, void *private_ctx)
-{
+                        sr_notif_event_t event, void *private_ctx) {
     UNUSED(private_ctx);
     interface_builder builder;
     shared_ptr<VOM::interface> intf;
@@ -102,7 +101,7 @@ oc_interfaces_config_cb(sr_session_ctx_t *ds, const char *xpath,
     if (event != SR_EV_VERIFY)
         return SR_ERR_OK;
 
-    if (sr_get_changes_iter(ds, (char *)xpath, &it) != SR_ERR_OK) {
+    if (sr_get_changes_iter(ds, (char *) xpath, &it) != SR_ERR_OK) {
         sr_free_change_iter(it);
         return SR_ERR_OK;
     }
@@ -121,9 +120,9 @@ oc_interfaces_config_cb(sr_session_ctx_t *ds, const char *xpath,
                 if (sr_xpath_node_name_eq(ne->xpath, "name")) {
                     builder.set_name(ne->data.string_val);
                     create = true;
-                } else if(sr_xpath_node_name_eq(ne->xpath, "type")) {
+                } else if (sr_xpath_node_name_eq(ne->xpath, "type")) {
                     builder.set_type(ne->data.string_val);
-                } else if(sr_xpath_node_name_eq(ne->xpath, "enabled")) {
+                } else if (sr_xpath_node_name_eq(ne->xpath, "enabled")) {
                     builder.set_state(ne->data.bool_val);
                 }
                 break;
@@ -171,7 +170,7 @@ oc_interfaces_config_cb(sr_session_ctx_t *ds, const char *xpath,
     }
 
     if (create || modify) {
-        if ( OM::write(intf->key(), *intf) != rc_t::OK ) {
+        if (OM::write(intf->key(), *intf) != rc_t::OK) {
             SRP_LOG_ERR("Fail writing changes to VPP for: %s",
                         builder.to_string().c_str());
             rc = SR_ERR_OPERATION_FAILED;
@@ -185,7 +184,7 @@ oc_interfaces_config_cb(sr_session_ctx_t *ds, const char *xpath,
     sr_free_change_iter(it);
     return SR_ERR_OK;
 
-nothing_todo:
+    nothing_todo:
     sr_free_val(ol);
     sr_free_val(ne);
     sr_free_change_iter(it);
@@ -196,9 +195,10 @@ nothing_todo:
 static int
 oc_interfaces_state_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
                        uint64_t request_id, const char *original_xpath,
-                       void *private_ctx)
-{
-    UNUSED(request_id); UNUSED(original_xpath); UNUSED(private_ctx);
+                       void *private_ctx) {
+    UNUSED(request_id);
+    UNUSED(original_xpath);
+    UNUSED(private_ctx);
     vapi_payload_sw_interface_details reply;
     shared_ptr<interface_dump> dump;
     string intf_name;
@@ -213,7 +213,7 @@ oc_interfaces_state_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
 
     ARG_CHECK3(SR_ERR_INVAL_ARG, xpath, values, values_cnt);
 
-    intf_name = sr_xpath_key_value((char*) xpath, "interface", "name", &state);
+    intf_name = sr_xpath_key_value((char *) xpath, "interface", "name", &state);
     if (intf_name.empty()) {
         SRP_LOG_ERR_MSG("XPATH interface name not found");
         return SR_ERR_INVAL_ARG;
@@ -235,7 +235,7 @@ oc_interfaces_state_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
     reply = dump->begin()->get_payload();
 
     sr_val_build_xpath(&vals[cnt], "%s/name", xpath_root);
-    sr_val_set_str_data(&vals[cnt], SR_STRING_T, (char *)reply.interface_name);
+    sr_val_set_str_data(&vals[cnt], SR_STRING_T, (char *) reply.interface_name);
     cnt++;
 
     //TODO revisit types after V3PO has been implemented
@@ -275,19 +275,21 @@ oc_interfaces_state_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
 }
 
 int
-openconfig_interface_init(sc_plugin_main_t *pm)
-{
+openconfig_interface_init(sc_plugin_main_t *pm) {
     int rc = SR_ERR_OK;
     SRP_LOG_DBG_MSG("Initializing openconfig-interfaces plugin.");
 
-    rc = sr_subtree_change_subscribe(pm->session, "/openconfig-interfaces:interfaces/interface/config",
-            oc_interfaces_config_cb, nullptr, 98, SR_SUBSCR_CTX_REUSE, &pm->subscription);
+    rc = sr_subtree_change_subscribe(pm->session,
+                                     "/openconfig-interfaces:interfaces/interface/config",
+                                     oc_interfaces_config_cb, nullptr, 98, SR_SUBSCR_CTX_REUSE,
+                                     &pm->subscription);
     if (SR_ERR_OK != rc) {
         goto error;
     }
 
     rc = sr_dp_get_items_subscribe(pm->session, "/openconfig-interfaces:interfaces/interface/state",
-            oc_interfaces_state_cb, nullptr, SR_SUBSCR_CTX_REUSE, &pm->subscription);
+                                   oc_interfaces_state_cb, nullptr, SR_SUBSCR_CTX_REUSE,
+                                   &pm->subscription);
     if (SR_ERR_OK != rc) {
         goto error;
     }
@@ -295,15 +297,15 @@ openconfig_interface_init(sc_plugin_main_t *pm)
     SRP_LOG_DBG_MSG("openconfig-interfaces plugin initialized successfully.");
     return SR_ERR_OK;
 
-error:
+    error:
     SRP_LOG_ERR("Error by initialization of openconfig-interfaces plugin. Error : %d", rc);
     return rc;
 }
 
 void
-openconfig_interface_exit(__attribute__((unused)) sc_plugin_main_t *pm)
-{
+openconfig_interface_exit(__attribute__((unused)) sc_plugin_main_t *pm) {
 }
 
 SC_INIT_FUNCTION(openconfig_interface_init);
+
 SC_EXIT_FUNCTION(openconfig_interface_exit);
