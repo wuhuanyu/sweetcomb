@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <boost/functional/hash.hpp>
 #include <sysrepo.h>
+//TODO compile to a target lib
 namespace oms {
     enum rc {
         err_failed = -1,

@@ -5,7 +5,7 @@
 #include "routing.hpp"
 #include <string>
 #include <memory>
-#include "utils/intfutils.h"
+#include "../utils/intfutils.h"
 #include <vom/interface.hpp>
 #include "common.hpp"
 #include "db.hpp"

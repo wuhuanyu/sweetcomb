@@ -13,7 +13,7 @@
 #include <memory>
 #include <vom/l3_binding.hpp>
 #include "common.hpp"
-#include "utils/intfutils.h"
+#include "../utils/intfutils.h"
 #include "db.hpp"
 
 namespace oms {

@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/home/stack/code/intern/sweetcomb/build",
+  "command": "/bin/g++-8    -g   -o CMakeFiles/sweetcomb.dir/sweetcomb.cpp.o -c /home/stack/code/intern/sweetcomb/sweetcomb.cpp",
+  "file": "/home/stack/code/intern/sweetcomb/sweetcomb.cpp"
+}
+]
