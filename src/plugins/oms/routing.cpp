@@ -31,8 +31,8 @@ namespace oms {
             return create_static_routing(dst_net,next_hop_addr,intfname);
         }
 
-        int del_static_routing(const std::string &dst_addr) {
-            string key = string("route_") + "target_" + dst_addr;
+        int del_static_routing(const std::string &dst_net) {
+            string key = string("route_") + "target_" + dst_net;
             VOM::OM::mark(key);
             VOM::OM::sweep(key);
             return success;

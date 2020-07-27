@@ -12,7 +12,7 @@ namespace oms {
     namespace routing {
         int create_static_routing(const std::string &dst_net, const std::string &next_hop_addr);
 
-        int del_static_routing(const std::string &dst_addr);
+        int del_static_routing(const std::string &dst_net);
 
         int create_static_routing(const std::string &dst_net, const std::string &next_hop_addr,
                                   const std::string &intf);

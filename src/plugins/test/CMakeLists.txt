@@ -1,5 +1,6 @@
 set(UNIT_TEST_LIST
-        oms)
+        oms
+        db)
 
 foreach(NAME IN LISTS UNIT_TEST_LIST)
     list(APPEND UNIT_TEST_SOURCE_LIST
