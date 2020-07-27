@@ -1,4 +1,4 @@
-#include "intfutils.h"
+#include "intfutils.hpp"
 #include "../common.hpp"
 
 using rc=sweetcomb::rc;

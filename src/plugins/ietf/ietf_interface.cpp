@@ -29,14 +29,11 @@
 #include <vom/om.hpp>
 #include <vom/l3_binding.hpp>
 #include <vom/route.hpp>
-
-#include <vpp-oper/interface.hpp>
-
 #include "sc_plugins.h"
 #include "sys_util.h"
-#include "utils/utils.h"
+#include "utils/utils.hpp"
 #include "cmds/intfcmd.h"
-#include "utils/intfutils.h"
+#include "utils/intfutils.hpp"
 #include "structures/interface.hpp"
 #include "parser.hpp"
 #include "oms/intf.hpp"
@@ -53,6 +50,7 @@ using namespace std;
 
 using namespace cmd;
 using namespace parser;
+
 
 class listener : public VOM::interface::stat_listener {
     void handle_interface_stat(const VOM::interface &itf) {}
@@ -353,7 +351,7 @@ static int ietf_interface_state_cb(const char *xpath, sr_val_t **values,
     UNUSED (original_xpath);
     UNUSED (private_ctx);
     vapi_payload_sw_interface_details interface;
-    shared_ptr<interface_dump> dump;
+    shared_ptr<oms::intf::interface_dump> dump;
     sr_val_t *val = nullptr;
     int vc = 6;  // number of answer per interfaces
     int cnt = 0; // value counter
@@ -366,7 +364,7 @@ static int ietf_interface_state_cb(const char *xpath, sr_val_t **values,
     if (!sr_xpath_node_name_eq(xpath, "interface"))
         goto nothing_todo; // no interface field specified
 
-    dump = make_shared<interface_dump>();
+    dump = make_shared<oms::intf::interface_dump>();
     HW::enqueue(dump);
     HW::write();
 

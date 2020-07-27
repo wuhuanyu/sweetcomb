@@ -12,7 +12,7 @@
 #include "common.hpp"
 #include <unordered_map>
 #include <unordered_set>
-#include "utils/utils.h"
+#include "utils/utils.hpp"
 
 namespace structs {
 

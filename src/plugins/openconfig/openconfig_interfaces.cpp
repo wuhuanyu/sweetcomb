@@ -20,7 +20,8 @@
 #include <vom/interface.hpp>
 #include <vom/om.hpp>
 
-#include <vpp-oper/interface.hpp>
+//#include <vpp-oper/interface.hpp>
+#include "oms/intf.hpp"
 
 #include <sc_plugins.h>
 
@@ -200,7 +201,7 @@ oc_interfaces_state_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
     UNUSED(original_xpath);
     UNUSED(private_ctx);
     vapi_payload_sw_interface_details reply;
-    shared_ptr<interface_dump> dump;
+    shared_ptr<oms::intf::interface_dump> dump;
     string intf_name;
     sr_val_t *vals = nullptr;
     sr_xpath_ctx_t state;
@@ -228,7 +229,7 @@ oc_interfaces_state_cb(const char *xpath, sr_val_t **values, size_t *values_cnt,
     if (SR_ERR_OK != rc)
         return rc;
 
-    dump = make_shared<interface_dump>(intf_name); //dump only specific intf
+    dump = make_shared<oms::intf::interface_dump>(intf_name); //dump only specific intf
     HW::enqueue(dump);
     HW::write();
 

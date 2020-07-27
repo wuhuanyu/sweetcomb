@@ -5,15 +5,12 @@
 #include <string>
 #include <exception>
 #include <memory>
-
-#include <vpp-oper/interface.hpp>
-
 #include "sc_plugins.h"
 #include "sys_util.h"
-#include "utils/utils.h"
+#include "utils/utils.hpp"
 #include "cmds/intfcmd.h"
 #include "cmds/routecmd.h"
-#include "utils/intfutils.h"
+#include "utils/intfutils.hpp"
 #include "structures/interface.hpp"
 #include "parser.hpp"
 #include "oms/routing.hpp"

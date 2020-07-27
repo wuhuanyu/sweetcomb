@@ -13,12 +13,16 @@
 #include <memory>
 #include <vom/l3_binding.hpp>
 #include "common.hpp"
-#include "../utils/intfutils.h"
+#include "../utils/intfutils.hpp"
 #include "db.hpp"
+
+#include <vom/dump_cmd.hpp>
+#include <vapi/interface.api.vapi.hpp>
+#include <vapi/ip.api.vapi.hpp>
 
 namespace oms {
     namespace intf {
-
+        using namespace VOM;
         using interface = VOM::interface;
         using OM = VOM::OM;
         using rc_t = VOM::rc_t;
@@ -184,5 +188,40 @@ namespace oms {
 
         }
 
+        interface_dump::interface_dump() {
+        }
+
+        interface_dump::interface_dump(std::string interface_name)
+                : m_name(interface_name) {
+        }
+
+        rc_t
+        interface_dump::issue(connection &con) {
+            m_dump.reset(new msg_t(con.ctx(), std::ref(*this)));
+
+            auto &payload = m_dump->get_request().get_payload();
+
+            if (m_name.empty()) {
+                payload.name_filter_valid = 0;
+            } else {
+                payload.name_filter_valid = 1;
+                strcpy((char *) payload.name_filter.buf, m_name.c_str());
+            }
+
+            VAPI_CALL(m_dump->execute());
+
+            wait();
+
+            return rc_t::OK;
+        }
+
+        std::string
+        interface_dump::to_string() const {
+            return ("itf-dump");
+        }
+
     } // namespace intf
 } // namespace oms
+
+
+

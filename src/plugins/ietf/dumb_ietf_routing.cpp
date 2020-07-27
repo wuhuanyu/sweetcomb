@@ -3,9 +3,9 @@
 
 #include "sc_plugins.h"
 #include "sys_util.h"
-#include "utils/utils.h"
+#include "utils/utils.hpp"
 #include "cmds/intfcmd.h"
-#include "utils/intfutils.h"
+#include "utils/intfutils.hpp"
 #include "parser.hpp"
 
 // const char *static_routing_xpath =

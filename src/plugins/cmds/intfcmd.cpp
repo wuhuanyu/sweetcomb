@@ -1,5 +1,5 @@
 #include "intfcmd.h"
-#include "utils/utils.h"
+#include "utils/utils.hpp"
 
 int cmd::add_intf_ip(const string &intf, const string &ip) {
     vec_str cmds = {

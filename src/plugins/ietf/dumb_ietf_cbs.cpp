@@ -3,9 +3,9 @@
 
 #include "sc_plugins.h"
 #include "sys_util.h"
-#include "utils/utils.h"
+#include "utils/utils.hpp"
 #include "cmds/intfcmd.h"
-#include "utils/intfutils.h"
+#include "utils/intfutils.hpp"
 
 static void dumb_parse_interface_ipv46_address(sr_val_t *val, string &addr,
                                                uint8_t &prefix) {

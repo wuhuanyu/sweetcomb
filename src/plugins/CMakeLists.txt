@@ -60,12 +60,9 @@ set(PLUGINS_SOURCES
         sc_init.c
         sc_plugins.c
         sys_util.cpp
-        utils/utils.cpp
-        vpp-oper/interface.cpp
         structures/interface.cpp
         cmds/intfcmd.cpp
         cmds/routecmd.cpp
-        utils/intfutils.cpp
         ietf/parser.cpp
         ietf/dumb_ietf_cbs.cpp
         ietf/dumb_ietf_routing.cpp
@@ -73,16 +70,19 @@ set(PLUGINS_SOURCES
         ietf/ietf_routing.cpp
         openconfig/openconfig_interfaces.cpp
         ietf/ietf_nat.cpp
-        oms/intf.cpp
-        oms/routing.cpp
-        oms/common.cpp oms/db.cpp)
 
+        )
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set_source_files_properties(${PLUGINS_SOURCES} PROPERTIES LANGUAGE CXX)
 
 # build the source code into shared library
 add_library(sweetcomb SHARED ${PLUGINS_SOURCES})
-target_link_libraries(sweetcomb ${SYSREPO_LIBRARIES} ${Boost_LIBRARIES}
+add_subdirectory(oms)
+add_subdirectory(utils)
+add_subdirectory(test)
+
+target_link_libraries(sweetcomb ${SYSREPO_LIBRARIES} ${Boost_LIBRARIES} oms utils
         ${VOM_LIBRARY})
 
 # INSTALL
