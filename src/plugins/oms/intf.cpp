@@ -124,6 +124,7 @@ namespace oms {
 #undef KEY
                 return err_failed;
             }
+#undef KEY
             ip ip_with_prefix=std::make_pair(ip_str, prefix_len);
 
             intfdb::put_ip_and_intf(ip_with_prefix, intf_name);

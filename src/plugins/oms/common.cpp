@@ -25,7 +25,7 @@ namespace oms {
         boost::asio::ip::make_address("10.0.1.0", er);
         return (!er);
     }
-    sr_error_e sr_error(int code){
+    sr_error_e sr_err(int code){
         sr_error_e rv;
         switch (code) {
             case err_failed:

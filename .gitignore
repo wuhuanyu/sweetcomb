@@ -13,3 +13,5 @@ build-root/*
 .vscode/
 cmake-build-debug
 *.out
+plugins/libkeystored.so
+plugins/libsweetcomb.so

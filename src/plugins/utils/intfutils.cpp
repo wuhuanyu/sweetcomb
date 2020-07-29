@@ -15,7 +15,7 @@ int extract_intf_name(const string &intf,string &result) {
 }
 
 
-bool is_af_intf(string intf) {
+bool is_af_intf(const string &intf) {
     return intf.find("host") != string::npos;
 }
 

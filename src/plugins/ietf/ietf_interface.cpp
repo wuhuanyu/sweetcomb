@@ -152,7 +152,7 @@ static int ietf_interface_create_cb(sr_session_ctx_t *session,
     if (create) {
         if (is_af_intf(if_name)) {
             int rc;
-            if((rc=oms::intf::create_af_packet_intf(if_name))!=oms::rc::success){
+            if((rc=oms::intf::create_af_packet_intf(if_name,enabled))!=oms::rc::success){
                 SRP_LOG_ERR("Error creating af packet interface %s",if_name.c_str());
                 rv=oms::sr_err(rc);
                 goto nothing_todo;
@@ -201,18 +201,18 @@ static int ipv46_config_add_remove(const string &intf_name,
     rc_t rc = rc_t::OK;
     SRP_LOG_DBG ("in function:%s", __FUNCTION__);
 
-    int rv = -1;
+    int rv = oms::rc::success;
     // todo check if interface exsits
     if (add) {
         SRP_LOG_DBG ("add ip %s to intf %s", addr.c_str(), intf_name.c_str());
-        if((rv==oms::intf::set_ip(intf_name,addr,prefix_length))!=oms::success){
-            SRP_LOG_ERR("Error when setting ip address %s/%d to %s",addr.c_str(),prefix_length,intf_name);
+        if((rv=oms::intf::set_ip(intf_name,addr,prefix_length))!=oms::success){
+            SRP_LOG_ERR("Error when setting ip address %s/%d to %s",addr.c_str(),prefix_length,intf_name.c_str());
         }
     } else {
         SRP_LOG_DBG ("delete ip %s from intf %s", addr.c_str(),
                      intf_name.c_str());
         if((rv=oms::intf::del_ip(intf_name,addr,prefix_length))!=oms::success){
-            SRP_LOG_ERR("Error when deleting ip address %s/%d to %s",addr.c_str(),prefix_length,intf_name);
+            SRP_LOG_ERR("Error when deleting ip address %s/%d to %s",addr.c_str(),prefix_length,intf_name.c_str());
         }
 
     }
@@ -284,7 +284,7 @@ static int ietf_interface_ipv46_address_change_cb(sr_session_ctx_t *session,
             switch (op) {
                 case SR_OP_CREATED:
                     create = true;
-                    parse_interface_ipv46_address(new_val, new_addr, new_prefix);
+                    parser::parse_interface_ipv46_address(new_val, new_addr, new_prefix);
                     SRP_LOG_DBG ("add ip %s/%d to intf %s", new_addr.c_str(),
                                  new_prefix, if_name.c_str());
                     break;
@@ -313,19 +313,20 @@ static int ietf_interface_ipv46_address_change_cb(sr_session_ctx_t *session,
         }
         sr_free_val(old_val);
         sr_free_val(new_val);
-
-        // if modify,delete and then create
-        if (del && !old_addr.empty()) {
-            SRP_LOG_DBG_MSG ("delete ip address");
-            op_rv = ipv46_config_add_remove(if_name, old_addr, old_prefix,
-                                            false /* del */);
-        }
-        if (create && !new_addr.empty()) {
-            SRP_LOG_DBG_MSG ("add ip address");
-            op_rv = ipv46_config_add_remove(if_name, new_addr, new_prefix,
-                                            true /* add */);
-        }
     }
+
+    // if modify,delete and then create
+    if (del && !old_addr.empty()) {
+        SRP_LOG_DBG_MSG ("delete ip address");
+        op_rv = ipv46_config_add_remove(if_name, old_addr, old_prefix,
+                                        false /* del */);
+    }
+    if (create && !new_addr.empty()) {
+        SRP_LOG_DBG_MSG ("add ip address");
+        op_rv = ipv46_config_add_remove(if_name, new_addr, new_prefix,
+                                        true /* add */);
+    }
+
     sr_free_change_iter(iter);
 
     return op_rv;
