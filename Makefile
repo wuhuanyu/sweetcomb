@@ -294,7 +294,7 @@ endif
 	@rm -rf $(BR)/build-package/_CPack_Packages;
 
 install-models:
-	@cd src/plugins/yang/ietf; \
+	@cd yang/ietf; \
 	sysrepoctl --install --yang=iana-if-type@2017-01-19.yang; \
 	sysrepoctl --install --yang=ietf-interfaces@2018-02-20.yang; \
 	sysrepoctl --install --yang=ietf-ip@2014-06-16.yang; \
@@ -303,7 +303,7 @@ install-models:
 	sysrepoctl --install --yang=ietf-routing@2018-03-13.yang;\
 	sysrepoctl --install --yang=ietf-ipv4-unicast-routing@2018-03-13.yang;\
 	sysrepoctl -e if-mib -m ietf-interfaces;
-	@cd src/plugins/yang/openconfig; \
+	@cd yang/openconfig; \
 	sysrepoctl -S --install --yang=openconfig-interfaces@2018-08-07.yang > /dev/null; \
 
 uninstall-models:
