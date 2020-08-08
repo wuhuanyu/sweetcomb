@@ -70,7 +70,6 @@ set(PLUGINS_SOURCES
         ietf/ietf_routing.cpp
         openconfig/openconfig_interfaces.cpp
         ietf/ietf_nat.cpp
-
         )
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

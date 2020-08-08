@@ -33,6 +33,7 @@ namespace oms {
         int create_af_packet_intf(const std::string &host_intf, bool up) {
             std::string intf_name;
             if(extract_intf_name(host_intf,intf_name)!=rc::success) return err_invalid_arg;
+
             interface::admin_state_t state =
                     (up ? interface::admin_state_t::UP : interface::admin_state_t::DOWN);
             std::shared_ptr<interface> intf = std::make_shared<interface>(

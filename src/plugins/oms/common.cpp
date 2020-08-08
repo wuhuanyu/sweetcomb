@@ -22,7 +22,7 @@ namespace oms {
 
     bool valid_ip(const std::string &ip) {
         boost::system::error_code er;
-        boost::asio::ip::make_address("10.0.1.0", er);
+        boost::asio::ip::make_address(ip, er);
         return (!er);
     }
     sr_error_e sr_err(int code){

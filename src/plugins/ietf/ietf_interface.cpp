@@ -300,8 +300,9 @@ static int ietf_interface_ipv46_address_change_cb(sr_session_ctx_t *session,
                     break;
                 case SR_OP_DELETED:
                     del = true;
-                    parser::parse_interface_ipv46_address(old_val, old_addr, old_prefix);
-                    SRP_LOG_DBG ("from intf %s del ip %s/%d", if_name.c_str(),
+                    if(old_addr.empty()||old_prefix==0)
+                        parser::parse_interface_ipv46_address(old_val, old_addr, old_prefix);
+                        SRP_LOG_DBG ("from intf %s del ip %s/%d", if_name.c_str(),
                                  old_addr.c_str(), old_prefix);
                     break;
                 default:
@@ -358,6 +359,7 @@ static int ietf_interface_state_cb(const char *xpath, sr_val_t **values,
     int cnt = 0; // value counter
     int interface_num = 0;
     int rc = SR_ERR_OK;
+    int count=0;
 
     SRP_LOG_INF ("In %s", __FUNCTION__);
 
@@ -372,12 +374,13 @@ static int ietf_interface_state_cb(const char *xpath, sr_val_t **values,
     interface_num = std::distance((*dump).begin(), (*dump).end());
 
     /* allocate array of values to be returned */
-    SRP_LOG_DBG ("number of interfaces: %d", interface_num + 1);
+//    SRP_LOG_DBG ("number of interfaces: %d", interface_num + 1);
     rc = sr_new_values((interface_num + 1) * vc, &val);
     if (0 != rc)
         goto nothing_todo;
 
     for (auto &it : *dump) {
+        count++;
         interface = it.get_payload();
 
         SRP_LOG_DBG ("State of interface %s", interface.interface_name);
@@ -418,6 +421,7 @@ static int ietf_interface_state_cb(const char *xpath, sr_val_t **values,
         val[cnt].data.uint64_val = interface.link_speed;
         cnt++;
     }
+    SRP_LOG_DBG("Number of interfaces:%d",count);
 
     *values = val;
     *values_cnt = cnt;
@@ -463,14 +467,15 @@ static int interface_statistics_cb(const char *xpath, sr_val_t **values,
                      intf_name.c_str());
     }
     sr_xpath_recover(&state);
-    //todo delete this
-    if (intf_name.find("host") != string::npos) {
-        intf_name = "vpp1vpp2";
-    }
 
-    interface = interface::find(intf_name);
+    std::string intf;
+    if(extract_intf_name(intf_name,intf)!=oms::rc::success){
+        SRP_LOG_ERR("Cannot parse interface name %s",intf_name.c_str());
+        return SR_ERR_INVAL_ARG;
+    }
+    interface = interface::find(intf);
     if (interface == nullptr) {
-        SRP_LOG_WRN ("interface %s not found in VOM", intf_name.c_str());
+        SRP_LOG_WRN ("interface %s not found in VOM", intf.c_str());
         goto nothing_todo;
     } else {
         SRP_LOG_DBG ("found interface with name %s", interface->name().c_str());

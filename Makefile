@@ -331,7 +331,7 @@ docker-test:
 
 run:
 	@export SR_PLUGINS_DIR=/home/stack/code/intern/sweetcomb/plugins
-	/home/stack/sysrepo-0.7.7/build/src/sysrepo-plugind -d -l 4
+	/home/stack/code/intern/sysrepo-0.7.7/build/src/sysrepo-plugind -d -l 4
 
 test:build-plugins
 	./build-root/build-plugins/plugins/test/tests

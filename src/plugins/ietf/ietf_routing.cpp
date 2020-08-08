@@ -20,8 +20,12 @@
 // const char *static_routing_xpath =
 //     "/ietf-routing:routing/control-plane-protocols/control-plane-protocol/static-routes/ipv4/route";
 const char *static_routing_xpath =
-        "/ietf-routing:routing/control-plane-protocols/control-plane-protocol/"
-        "static-routes/ietf-ipv4-unicast-routing:ipv4/route";
+        "/ietf-routing:routing"
+        "/control-plane-protocols"
+        "/control-plane-protocol"
+        "/static-routes"
+        "/ietf-ipv4-unicast-routing:ipv4"
+        "/route";
 
 
 // route add_remove_cb callback
